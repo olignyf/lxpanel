@@ -1,0 +1,125 @@
+* Fixed search for the gtkrc file.
+* Fixed search path for configuration - it should be not compilation time
+    path but paths using $XDG_CONFIG_DIRS.
+* Fixed incorrect flag for 'launchbar' plugin which marks him expandable.
+* Fixed dragging of task buttons.
+* Corrected using $XDG_MENU_PREFIX to work the same way as libfm does.
+* Fixed using font description, font in gtkrc file was ignored.
+* Improved search for hw sensors in /sys/class/hwmon/ hierarchy.
+* Improved check for critical temperatures in 'termal' plugin, now each
+    individual hardware setting (if available) is also taken into
+    consideration.
+* Fixed parsing alias name in 'weather' plugin settings.
+* Got rid of all individual plugins/*/Makefile - those rules more easily
+    can be contained in the plugins/Makefile.am. Adding a simple plugin
+    basically would mean to add three lines into that file instead of
+    writing whole Makefile.am.
+* Fixed invalid system config path search ("lxpanel" part was missing).
+* Fixed incorrect requirements in the lxpanel.pc file.
+* Fixed memory leak in the 'volumealsa' plugin.
+* Now 'volumealsa' checks for 'MixerCommand' setting in the configuration
+    before guessing it.
+* Fixed color saving in the configuration.
+* Fixed incomplete resources deallocation in 'volumealsa' plugin.
+* Fixed make uninstall (it left plugins installed).
+* Fixed monitor number set from GUI.
+* Fixed hang on netstatus icon in auto-hidden panel.
+* Fixed icon grid compilation with GTK+ < 2.20.
+* Fixed compilation without menu-cache.
+* Now man pages are included in the GIT and tarball, not just xml files.
+* Fixed incorrect printf arguments in 'netstatus' plugin.
+
+0.7.0
+-------------------------------------------------------------------------
+* New plugin 'launchtaskbar' with combined functionality from 'launchbar'
+    and 'taskbar'. For easy support codebase is merged instead of doing
+    duplicates but appearance is still the same in dependency from mode
+    chosen.
+* Integrated with LibFM, all launching and application selection in the
+    launchbar settings is done by LibFM now.
+* New simpler plugins API implementation, using LibFM plugins loader. In
+    new API some callbacks were simplified and some removed, see all the
+    detailed descriptions in the file plugin.h.
+* New plugins are GtkWidgets now, therefore there is no explicit destroy
+    for them or their data, all will be handled implicitly.
+* Changed config access with simple API similar to libconfig one.
+* Using icon caching from LibFM.
+* Applications properties in the menu are managed by LibFM API, no more
+    calls to lxshortcut application.
+* Setting for file manager is not handled on its own but XDG setting is
+    used now, i.e. default choice for "inode/directory" MIME type.
+* Setting for terminal is handled by LibFM, therefore it is the same as
+    in PCManFM now, no own setting anymore.
+* Replaced configure option --enable-cast-checks with --enable-debug.
+* Replaced 'pager' plugin with former 'wnckpager' one. The 'wnckpager'
+    name is still supported for compatibility but it is the same plugin.
+* Added new plugin 'weather', written by Piotr Sipika.
+* Using drag & drop handling from LibFM in launchbar. It is possible now
+    to use any kind of files as launchbuttons, and folders can receive
+    drops as well.
+* Allowed drag applications from system menu plugin so they now can be
+    dropped somewhere. The obvious example is drop on the desktop.
+* Using human readable sensor names if available (like 'Core 0', etc.).
+* Panel is allowed to hide completely (setting width when hidden to 0).
+* The IconGrid converted into GtkContainer derived class PanelIconGrid.
+* Allowed to use <USER_CONFIG_DIR>/lxpanel/<profile>/gtkrc for the panel
+    custom style setup.
+* The panel itself in not a struct now but a GtkWindow derived class so
+    no special API to destroy it is required.
+* Improved the layout of icons in panel, they will not align to the edge
+    of screen but appropriately to panel height. Some of them did that
+    already but some were aligned to the screen edge without any gap.
+* The button to configure plugin in panel plugins configuration tab is
+    renamed from 'Edit' to 'Properties'.
+* All logging is unified. The option --log is deprecated and isn't used
+    anymore. User can change logs appearance using G_MESSAGES_DEBUG and
+    G_MESSAGES_PREFIXED environment variables (see GLib docs).
+* Old APIs are in place still for backward compatibility with third party
+    plugins but will be dropped later, supposedly on next feature release
+    point. Old APIs are not present in public headers, compatibility is
+    on binary level only.
+* A whole lot of bugfixes.
+
+0.6.x
+-------------------------------------------------------------------------
+***
+
+0.5.x
+-------------------------------------------------------------------------
+***
+
+0.4.x
+-------------------------------------------------------------------------
+***
+
+0.3.x
+-------------------------------------------------------------------------
+***
+
+0.2.9.x
+-------------------------------------------------------------------------
+
+0.2.8.x
+-------------------------------------------------------------------------
+
+0.2.7.2
+-------------------------------------------------------------------------
+1. Add manapages of lxpanelctl.
+2. Supported HWAddr status in netstat plugin.
+
+0.2.7.1
+-------------------------------------------------------------------------
+1. Add manpages.
+2. reduce memory usage and delete unused functions in netstat plugin.
+
+0.2.7
+-------------------------------------------------------------------------
+1. Fixed compile errors in configure and Makefile.am.
+2. Deleted unused files.
+3. Add a new network status plugin - netstat (testing).
+4. Fixed incorrect path of icons.
+5. Changed icon size to reduce memory usage.
+6. Add LXDE-specific configuration profile for LXPanel.
+7. Use "*.directory" file for the translation of categories if available.
+   #1875624 - LXPanel does not correctly show xdg menus.
+8. Fixed tintcolor bug (Request ID 1900678).
