@@ -434,9 +434,11 @@ static GtkWidget* create_item(MenuCacheItem *item, menup *m)
     {
         GtkWidget* img;
         /* create FmFileInfo for the item, it will be used in callbacks */
-        char *mpath = menu_cache_dir_make_path(MENU_CACHE_DIR(item));
-        FmPath *path = fm_path_new_relative(fm_path_get_apps_menu(), mpath+13);
+        //!!!!SPL char *mpath = menu_cache_dir_make_path(MENU_CACHE_DIR(item));
+        //!!!!SPL FmPath *path = fm_path_new_relative(fm_path_get_apps_menu(), mpath+13);
                                                     /* skip "/Applications" */
+		char *mpath =  menu_cache_item_get_file_path(MENU_CACHE_DIR(item));
+        FmPath *path = fm_path_new_for_path (mpath);
         FmFileInfo *fi = fm_file_info_new_from_menu_cache_item(path, item);
 
         g_free(mpath);
