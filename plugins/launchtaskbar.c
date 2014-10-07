@@ -66,6 +66,7 @@
 
 #define PANEL_ICON_SIZE 24 /* see the private.h */
 
+#define LAUNCHBAR_ICON_TRIM 6
 /* Column definitions for configuration dialogs. */
 enum {
     COL_ICON,
@@ -187,6 +188,7 @@ struct LaunchTaskBarPlugin {
     gboolean         lb_built;
     gboolean         tb_built;
     gboolean         fixed_mode;        /* if mode cannot be changed */
+	LaunchButton	*lastb;
 };
 
 static gchar *launchtaskbar_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
@@ -198,7 +200,16 @@ static gchar *launchtaskbar_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
         "GtkButton::inner-border={0,0,0,0}\n"
         "}\n"
         "widget '*launchbar.*' style 'launchtaskbar-style'\n"
-        "widget '*taskbar.*' style 'launchtaskbar-style'";
+        "widget '*taskbar.*' style 'launchtaskbar-style'\n"
+		"style 'button'\n"
+		"{\n"
+		"bg[PRELIGHT]=@selected_bg_color\n"
+		"}\n"
+//		"style 'label'\n"
+//		"{\n"
+//		"fg[PRELIGHT]=@selected_fg_color\n"
+//		"}\n"
+;
 
 #define DRAG_ACTIVE_DELAY    1000
 #define TASK_WIDTH_MAX       200
@@ -332,17 +343,28 @@ static void launchbutton_free(LaunchButton * btn)
 }
 
 /* Handler for "button-press-event" event from launchtaskbar button. */
-static gboolean launchbutton_press_event(GtkWidget * widget, GdkEventButton * event, LaunchButton * b)
+//static gboolean launchbutton_press_event(GtkWidget * widget, GdkEventButton * event, LaunchButton * b)
+static gboolean launchbutton_press_event(GtkWidget * widget, GdkEventButton * event, LXPanel * p)
 {
+    LaunchTaskBarPlugin *ltbp = lxpanel_plugin_get_data(widget);
+    
     if (event->button == 1 && event->type == GDK_BUTTON_PRESS) /* left button */
     {
-        if (b->fi == NULL)  /* The bootstrap button */
-            lxpanel_plugin_show_config_dialog(b->p->plugin);
+        if (ltbp->lastb->fi == NULL)  /* The bootstrap button */
+            lxpanel_plugin_show_config_dialog(ltbp->lastb->p->plugin);
         else
-            lxpanel_launch_path(b->p->panel, fm_file_info_get_path(b->fi));
+            lxpanel_launch_path(p, fm_file_info_get_path(ltbp->lastb->fi));
         return TRUE;
     }
     return FALSE;
+}
+
+static gboolean pass_signal(GtkWidget *widget, GdkEventButton *event, LaunchButton *btn)
+{
+	gboolean res;
+	btn->p->lastb = btn;
+	g_signal_emit_by_name (G_OBJECT(btn->p->plugin), "button-press-event", event, &res);
+	return TRUE;
 }
 
 /* Handler for "drag-motion" event from launchtaskbar button. */
@@ -378,15 +400,19 @@ static void launchbutton_build_bootstrap(LaunchTaskBarPlugin *lb)
         lb->bootstrap_button->p = lb;
 
         /* Create an event box. */
-        GtkWidget * event_box = gtk_event_box_new();
+        //GtkWidget * event_box = gtk_event_box_new();
+        GtkWidget * event_box = gtk_button_new();
         gtk_container_set_border_width(GTK_CONTAINER(event_box), 0);
-        gtk_widget_set_can_focus            (event_box, FALSE);
+    	gtk_button_set_relief (GTK_BUTTON (event_box), GTK_RELIEF_NONE);
+    	GTK_WIDGET_UNSET_FLAGS (event_box, GTK_CAN_FOCUS);
+    
         lb->bootstrap_button->widget = event_box;
-        g_signal_connect(event_box, "button-press-event", G_CALLBACK(launchbutton_press_event), lb->bootstrap_button);
+        //!!!!SPLg_signal_connect(event_box, "button-press-event", G_CALLBACK(launchbutton_press_event), lb->bootstrap_button);
+    	g_signal_connect(event_box, "button-press-event", G_CALLBACK(pass_signal), lb->bootstrap_button);
 
         /* Create an image containing the stock "Add" icon as a child of the event box. */
         lb->add_icon = fm_icon_from_name(GTK_STOCK_ADD);
-        icon = fm_pixbuf_from_icon(lb->add_icon, lb->icon_size);
+        icon = fm_pixbuf_from_icon(lb->add_icon, lb->icon_size - LAUNCHBAR_ICON_TRIM);
         lb->bootstrap_button->image_widget = gtk_image_new_from_pixbuf(icon);
         g_object_unref(icon);
         gtk_misc_set_padding(GTK_MISC(lb->bootstrap_button->image_widget), 0, 0);
@@ -492,8 +518,21 @@ static LaunchButton *launchbutton_for_file_info(LaunchTaskBarPlugin * lb, FmFile
     btn->fi = fi;
 
     /* Create a button with the specified icon. */
-    button = lxpanel_button_new_for_fm_icon(lb->panel, fm_file_info_get_icon(fi),
-                                            NULL, NULL);
+//    button = lxpanel_button_new_for_fm_icon(lb->panel, fm_file_info_get_icon(fi),
+//                                            NULL, NULL);
+
+    button = gtk_button_new ();
+    gtk_container_set_border_width (GTK_CONTAINER (button), 0);
+    gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
+    GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
+    
+    GtkWidget * image = _gtk_image_new_for_icon (fm_file_info_get_icon (fi), lb->icon_size - LAUNCHBAR_ICON_TRIM);   
+    gtk_misc_set_padding (GTK_MISC (image), 0, 0);
+    gtk_misc_set_alignment (GTK_MISC (image), 0, 0);
+    
+    gtk_container_add (GTK_CONTAINER (button), image);
+    gtk_widget_show_all (button);
+
     btn->widget = button;
     gtk_widget_set_can_focus(button, FALSE);
 
@@ -506,7 +545,8 @@ static LaunchButton *launchbutton_for_file_info(LaunchTaskBarPlugin * lb, FmFile
     btn->dd = fm_dnd_dest_new_with_handlers(button);
 
     /* Connect signals. */
-    g_signal_connect(button, "button-press-event", G_CALLBACK(launchbutton_press_event), (gpointer) btn);
+    //!!!!SPLg_signal_connect(button, "button-press-event", G_CALLBACK(launchbutton_press_event), (gpointer) btn);
+    g_signal_connect(button, "button-press-event", G_CALLBACK(pass_signal), (LaunchButton *) btn);
     g_signal_connect(button, "drag-motion", G_CALLBACK(launchbutton_drag_motion_event), btn);
 
     /* If the list goes from null to non-null, remove the bootstrap button. */
@@ -915,7 +955,8 @@ static void launchtaskbar_destructor(gpointer user_data)
 static void _launchbar_configure_add(GtkTreeView *menu_view, LaunchTaskBarPlugin *ltbp)
 {
     GtkTreeView * defined_view = GTK_TREE_VIEW(g_object_get_data(G_OBJECT(ltbp->config_dlg), "defined_view"));
-    FmPath * sel_path = fm_app_menu_view_dup_selected_app_desktop_path(menu_view);
+    //FmPath * sel_path = fm_app_menu_view_dup_selected_app_desktop_path(menu_view);
+    FmPath * sel_path = fm_path_new_for_path (fm_app_menu_view_dup_selected_app_desktop_file_path(menu_view));
     LaunchButton * btn;
 
     if (sel_path != NULL && (btn = launchbutton_build_gui(ltbp, sel_path)) != NULL)
@@ -1473,7 +1514,7 @@ static void launchtaskbar_panel_configuration_changed(LXPanel *panel, GtkWidget 
         {
             LaunchButton * btn = (LaunchButton *) l->data;
             lxpanel_button_update_icon(btn->widget, fm_file_info_get_icon(btn->fi),
-                                       new_icon_size);
+                                       new_icon_size - LAUNCHBAR_ICON_TRIM);
         }
 
     }
@@ -1601,8 +1642,9 @@ static void task_draw_label(Task * tk)
     if (tk->tb->tooltips)
         gtk_widget_set_tooltip_text(tk->button, label);
 
-    lxpanel_draw_label_text(tk->tb->panel, tk->label, label, bold_style, 1,
-            tk->tb->flat_button);
+    //lxpanel_draw_label_text(tk->tb->panel, tk->label, label, bold_style, 1,
+    //        tk->tb->flat_button);
+	gtk_label_set_text (GTK_LABEL(tk->label), label);
 
     g_free(label);
 }
@@ -2704,10 +2746,19 @@ static void taskbar_button_size_allocate(GtkWidget * btn, GtkAllocation * alloc,
 /* Update style on the taskbar when created or after a configuration change. */
 static void taskbar_update_style(LaunchTaskBarPlugin * tb)
 {
+    GtkStyle *style = gtk_widget_get_style(tb->panel);    
+    int font_height = pango_font_description_get_size (style->font_desc) / PANGO_SCALE;
+    // scale from points to pixels
+    font_height *= 4;
+    font_height /= 3;
+    font_height += 2 * LAUNCHBAR_ICON_TRIM;
+    
+    if (tb->icon_size > font_height) font_height = tb->icon_size;
+    
     panel_icon_grid_set_geometry(PANEL_ICON_GRID(tb->tb_icon_grid),
         panel_get_orientation(tb->panel),
         ((tb->icons_only) ? tb->icon_size + ICON_ONLY_EXTRA : tb->task_width_max),
-        tb->icon_size, tb->spacing, 0, panel_get_height(tb->panel));
+        font_height, tb->spacing, 0, panel_get_height(tb->panel));
 }
 
 /* Update style on a task button when created or after a configuration change. */
@@ -2795,6 +2846,11 @@ static void task_build_gui(LaunchTaskBarPlugin * tb, Task * tk)
     tk->label = gtk_label_new(NULL);
     gtk_misc_set_alignment(GTK_MISC(tk->label), 0.0, 0.5);
     gtk_label_set_ellipsize(GTK_LABEL(tk->label), PANGO_ELLIPSIZE_END);
+    
+    /* set the text colour on mouse over */
+	gtk_widget_realize (tb->menu);
+	GdkColor colorf = gtk_widget_get_style(tb->menu)->fg[GTK_STATE_SELECTED];
+    gtk_widget_modify_fg (tk->label, GTK_STATE_PRELIGHT, &colorf);
     gtk_box_pack_start(GTK_BOX(container), tk->label, TRUE, TRUE, 0);
 
     /* Add the box to the button. */
@@ -3461,7 +3517,8 @@ static LXPanelPluginInit _launchbar_init = {
 
     .new_instance = launchbar_constructor,
     .config = launchtaskbar_configure,
-    .reconfigure = launchtaskbar_panel_configuration_changed
+    .reconfigure = launchtaskbar_panel_configuration_changed,
+    .button_press_event = launchbutton_press_event
 };
 
 static LXPanelPluginInit _taskbar_init = {

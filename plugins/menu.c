@@ -61,7 +61,7 @@
  */
 
 typedef struct {
-    GtkWidget *menu, *box, *img, *label;
+    GtkWidget *menu, *box, *img, *label, *icon;
     char *fname, *caption;
     gulong handler_id;
     int iconsize;
@@ -79,6 +79,19 @@ typedef struct {
 static guint idle_loader = 0;
 
 GQuark SYS_MENU_ITEM_ID = 0;
+
+static gchar *menu_rc = "style 'menu-style'\n"
+"{\n"
+"GtkWidget::focus-padding=0\n" /* FIXME: seem to fix #2821771, not sure if this is ok. */
+"GtkWidget::focus-line-width=0\n"
+"GtkWidget::focus-padding=0\n"
+"GtkButton::default-border={0,0,0,0}\n"
+"GtkButton::default-outside-border={0,0,0,0}\n"
+"GtkButton::inner-border={4,4,0,0}\n" /* added in gtk+ 2.10 */
+"}\n"
+"widget '*.menu.*' style 'menu-style'";
+
+#define ICON_BUTTON_YTRIM 6
 
 /* FIXME: this is defined in misc.c and should be replaced later */
 GtkWidget *_gtk_image_new_from_file_scaled(const gchar *file, gint width,
@@ -660,16 +673,17 @@ static void show_menu( GtkWidget* widget, menup* m, int btn, guint32 time )
 }
 
 static gboolean
-my_button_pressed(GtkWidget *widget, GdkEventButton *event, menup *m)
+my_button_pressed(GtkWidget *widget, GdkEventButton *event, LXPanel *p)
 {
     ENTER;
+    menup* m = lxpanel_plugin_get_data(widget);
     GtkAllocation allocation;
     gtk_widget_get_allocation(GTK_WIDGET(widget), &allocation);
 
     if ((event->type == GDK_BUTTON_PRESS) && event->button == 1
           && (event->x >=0 && event->x < allocation.width)
           && (event->y >=0 && event->y < allocation.height)) {
-        show_menu( widget, m, event->button, event->time );
+        show_menu( m->img, m, event->button, event->time );
         RET(TRUE);
     }
     RET(FALSE);
@@ -695,11 +709,19 @@ static void show_system_menu(GtkWidget *p)
         m->show_system_menu_idle = g_timeout_add(200, show_system_menu_idle, m);
 }
 
+static gboolean
+pass_signal(GtkWidget *widget, GdkEventButton *event, menup *m)
+{
+	gboolean res;
+	g_signal_emit_by_name (G_OBJECT(m->box), "button-press-event", event, &res);
+	return TRUE;
+}
+
 static GtkWidget *
 make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, GtkWidget *menu)
 {
     char* title = NULL;
-
+#if 0
     ENTER;
     m->menu = menu;
 
@@ -732,6 +754,82 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
 
     m->handler_id = g_signal_connect (G_OBJECT (m->img), "button-press-event",
           G_CALLBACK (my_button_pressed), m);
+    g_object_set_data(G_OBJECT(m->img), "plugin", m);
+
+    m->ds = fm_dnd_src_new(NULL);
+
+    RET(m->img);
+#endif
+    ENTER;
+    gtk_rc_parse_string(menu_rc);
+    //m = (menup *)p->priv;
+    m->menu = menu;
+    m->img = gtk_button_new();
+    gtk_container_set_border_width(GTK_CONTAINER(m->img), 0);
+    
+    /* set the background colour on mouse-over */	
+  	gtk_widget_realize (menu);
+	GdkColor colorb = gtk_widget_get_style(menu)->bg[GTK_STATE_SELECTED];
+  	gtk_widget_modify_bg (m->img, GTK_STATE_PRELIGHT, &colorb);
+  	
+    /* Create a box to contain the application icon and window title. */
+    GtkWidget * container = gtk_hbox_new(FALSE, 1);
+    gtk_container_set_border_width(GTK_CONTAINER(container), 0);
+
+    /* Create an image to contain the application icon and add it to the box. */
+    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_YTRIM, TRUE, NULL);
+    m->icon = gtk_image_new_from_pixbuf(pixbuf);
+    gtk_misc_set_padding(GTK_MISC(m->icon), 0, 0);
+    g_object_unref(pixbuf);
+    gtk_widget_show(m->icon);
+    gtk_box_pack_start(GTK_BOX(container), m->icon, FALSE, FALSE, 0);
+    
+    if( name )
+    {
+        /* load the name from *.directory file if needed */
+        if( g_str_has_suffix( name, ".directory" ) )
+        {
+            GKeyFile* kf = g_key_file_new();
+            char* dir_file = g_build_filename( "desktop-directories", name, NULL );
+            if( g_key_file_load_from_data_dirs( kf, dir_file, NULL, 0, NULL ) )
+            {
+                title = g_key_file_get_locale_string( kf, "Desktop Entry", "Name", NULL, NULL );
+            }
+            g_free( dir_file );
+            g_key_file_free( kf );
+        }
+        else
+            title = name;
+
+    	/* Create a label to contain the window title and add it to the box. */
+    	m->label = gtk_label_new(title);
+    	gtk_misc_set_alignment(GTK_MISC(m->label), 0.0, 0.5);
+    	gtk_widget_show (m->label);
+  	
+    	/* set the text colour on mouse-over */
+		GdkColor colorf = gtk_widget_get_style(menu)->fg[GTK_STATE_SELECTED];
+    	gtk_widget_modify_fg (m->label, GTK_STATE_PRELIGHT, &colorf);
+    	gtk_box_pack_start(GTK_BOX(container), m->label, TRUE, TRUE, 0);
+    	
+        if( title != name )
+            g_free( title );
+    }
+  	
+    /* Add the box to the button. */
+    gtk_widget_show(container);
+    gtk_container_add(GTK_CONTAINER(m->img), container);
+    gtk_container_set_border_width(GTK_CONTAINER(m->img), 0);
+  	
+    gtk_widget_show(m->img);
+    gtk_box_pack_start(GTK_BOX(m->box), m->img, FALSE, FALSE, 0);
+
+    //m->handler_id = g_signal_connect (G_OBJECT (m->img), "button-press-event",
+    //      G_CALLBACK (my_button_pressed), p);
+    //g_object_set_data(G_OBJECT(m->img), "plugin", p);
+    //m->handler_id = g_signal_connect (G_OBJECT (m->img), "button-press-event",
+    //      G_CALLBACK (my_button_pressed), m);
+    m->handler_id = g_signal_connect (G_OBJECT (m->img), "button-press-event",
+          G_CALLBACK (pass_signal), m);
     g_object_set_data(G_OBJECT(m->img), "plugin", m);
 
     m->ds = fm_dnd_src_new(NULL);
@@ -782,7 +880,11 @@ read_item(menup *m, config_setting_t *s)
     /* menu button */
     if( cmd_entry ) /* built-in commands */
     {
-        item = gtk_image_menu_item_new_with_label( _(cmd_entry->disp_name) );
+    	if (name == NULL)
+        	item = gtk_image_menu_item_new_with_label( _(cmd_entry->disp_name) );
+        else 
+        	item = gtk_image_menu_item_new_with_label (name);        	
+        //item = gtk_image_menu_item_new_with_label( _(cmd_entry->disp_name) );
         g_signal_connect(G_OBJECT(item), "activate", (GCallback)run_command, cmd_entry->cmd);
     }
     else if (action)
@@ -967,8 +1069,16 @@ menu_constructor(LXPanel *panel, config_setting_t *settings)
     m = g_new0(menup, 1);
     g_return_val_if_fail(m != NULL, 0);
 
-    gtk_icon_size_lookup( GTK_ICON_SIZE_MENU, &iw, &ih );
-    m->iconsize = MAX(iw, ih);
+    //gtk_icon_size_lookup( GTK_ICON_SIZE_MENU, &iw, &ih );
+    //m->iconsize = MAX(iw, ih);
+    iw = panel_get_icon_size (panel);
+    if (iw <= 12) iw = 8;
+    else if (iw <= 19) iw = 16;
+    else if (iw <= 23) iw = 22;
+    else if (iw <= 28) iw = 24;
+    else if (iw <= 40) iw = 32;
+    else iw = 48;
+    m->iconsize = iw;
 
     m->box = gtk_vbox_new(TRUE, 0);
     lxpanel_plugin_set_data(m->box, m, menu_destructor);
@@ -986,9 +1096,12 @@ menu_constructor(LXPanel *panel, config_setting_t *settings)
         config_setting_add(settings, "system", PANEL_CONF_TYPE_GROUP);
         config_setting_add(settings, "separator", PANEL_CONF_TYPE_GROUP);
         s = config_setting_add(settings, "item", PANEL_CONF_TYPE_GROUP);
+        	config_group_set_string(s, "name", "Run...");
             config_group_set_string(s, "command", "run");
+            config_group_set_string(s, "image", "gnome-run");
         config_setting_add(settings, "separator", PANEL_CONF_TYPE_GROUP);
         s = config_setting_add(settings, "item", PANEL_CONF_TYPE_GROUP);
+        	config_group_set_string(s, "name", "Shutdown...");
             config_group_set_string(s, "command", "logout");
             config_group_set_string(s, "image", "gnome-logout");
         config_group_set_string(m->settings, "image", DEFAULT_MENU_ICON);
@@ -1003,13 +1116,43 @@ menu_constructor(LXPanel *panel, config_setting_t *settings)
     return m->box;
 }
 
-static gboolean apply_config(gpointer user_data)
+static gboolean apply_config(GtkWidget *p)
 {
-    GtkWidget *p = user_data;
     menup* m = lxpanel_plugin_get_data(p);
+    
+    /* update the local icon size parameter */
+    int iw = panel_get_icon_size(m->panel);
+    if (iw <= 12) iw = 8;
+    else if (iw <= 19) iw = 16;
+    else if (iw <= 23) iw = 22;
+    else if (iw <= 28) iw = 24;
+    else if (iw <= 40) iw = 32;
+    else iw = 48;
+    m->iconsize = iw;
 
     if( m->fname ) {
-        lxpanel_button_set_icon(m->img, m->fname, panel_get_icon_size(m->panel));
+        //lxpanel_button_set_icon(m->img, m->fname, panel_get_icon_size(m->panel));
+        
+        /* Locate the image within the button. */
+    	GtkWidget * child = gtk_bin_get_child(GTK_BIN(m->img));
+    	GtkWidget * img = NULL;
+    	if (GTK_IS_IMAGE(child))
+        	img = child;
+    	else if (GTK_IS_BOX(child))
+    	{
+        	GList * children = gtk_container_get_children(GTK_CONTAINER(child));
+        	img = GTK_WIDGET(GTK_IMAGE(children->data));
+        	g_list_free(children);
+    	}
+
+    	if (img != NULL)
+    	{
+    		GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(m->fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_YTRIM, TRUE, NULL);
+    		gtk_image_set_from_pixbuf(GTK_IMAGE(m->icon), pixbuf);
+    		gtk_misc_set_padding(GTK_MISC(m->icon), 0, 0);
+    		g_object_unref(pixbuf);
+    	}
+    
     }
     config_group_set_string(m->settings, "image", m->fname);
     config_group_set_string(m->settings, "name", m->caption);
@@ -1021,7 +1164,7 @@ static GtkWidget *menu_config(LXPanel *panel, GtkWidget *p)
     menup* menu = lxpanel_plugin_get_data(p);
     return lxpanel_generic_config_dlg(_("Menu"), panel, apply_config, p,
                                       _("Icon"), &menu->fname, CONF_TYPE_FILE_ENTRY,
-                                      /* _("Caption"), &menu->caption, CONF_TYPE_STR, */
+                                      _("Caption"), &menu->caption, CONF_TYPE_STR,
                                       NULL);
 }
 
@@ -1038,7 +1181,8 @@ LXPanelPluginInit lxpanel_static_plugin_menu = {
     .new_instance = menu_constructor,
     .config = menu_config,
     .reconfigure = menu_panel_configuration_changed,
-    .show_system_menu = show_system_menu
+    .show_system_menu = show_system_menu,
+    .button_press_event = my_button_pressed
 };
 
 /* vim: set sw=4 et sts=4 : */

@@ -1001,7 +1001,7 @@ static void _gtk_image_set_from_file_scaled(GtkWidget * img, ImgData * data)
 }
 
 /* consumes reference on icon */
-static GtkWidget *_gtk_image_new_for_icon(FmIcon *icon, gint size)
+GtkWidget *_gtk_image_new_for_icon(FmIcon *icon, gint size)
 {
     GtkWidget * img = gtk_image_new();
     ImgData * data = g_new0(ImgData, 1);

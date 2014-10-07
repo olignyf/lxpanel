@@ -213,10 +213,11 @@ static void panel_icon_grid_size_request(GtkWidget *widget,
     {
         /* In horizontal orientation, fit as many rows into the available height as possible.
          * Then allocate as many columns as necessary.  Guard against zerodivides. */
-        ig->rows = 0;
-        if ((ig->child_height + ig->spacing) != 0)
-            ig->rows = (target_dimension + ig->spacing - border * 2) / (ig->child_height + ig->spacing);
-        if (ig->rows == 0)
+        //!!!!SPL hard code this to 1 row... 
+        //ig->rows = 0;
+        //if ((ig->child_height + ig->spacing) != 0)
+        //    ig->rows = (target_dimension + ig->spacing - border * 2) / (ig->child_height + ig->spacing);
+        //if (ig->rows == 0)
             ig->rows = 1;
         ig->columns = (visible_children + (ig->rows - 1)) / ig->rows;
         /* if ((ig->columns == 1) && (ig->rows > visible_children))
