@@ -985,7 +985,7 @@ read_include(Plugin *p, char **fp)
 #endif
 
 static GtkWidget *
-read_submenu(menup *m, config_setting_t *s, gboolean as_item)
+read_submenu(menup *m, config_setting_t *s, int as_item)
 {
     GtkWidget *mi, *menu;
     const gchar *name, *fname, *str;
@@ -1033,6 +1033,7 @@ read_submenu(menup *m, config_setting_t *s, gboolean as_item)
         gtk_widget_show(mi);
         gtk_menu_shell_append (GTK_MENU_SHELL (menu), mi);
     }
+    if (as_item == 2) return menu;
     if (as_item) {
         mi = gtk_image_menu_item_new_with_label(name);
         if (fname) {
@@ -1156,6 +1157,16 @@ static gboolean apply_config(GtkWidget *p)
     }
     config_group_set_string(m->settings, "image", m->fname);
     config_group_set_string(m->settings, "name", m->caption);
+
+	// SPL - this bit is slow but resizes the menu items properly...
+    if (m->menu) gtk_widget_destroy(m->menu);
+    if( m->menu_cache )
+    {
+        menu_cache_remove_reload_notify(m->menu_cache, m->reload_notify);
+        menu_cache_unref( m->menu_cache );
+    }
+    m->menu_cache = NULL;
+	m->menu = read_submenu(m, m->settings, 2);
     return FALSE;
 }
 
