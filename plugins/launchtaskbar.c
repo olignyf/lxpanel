@@ -2752,9 +2752,9 @@ static void taskbar_update_style(LaunchTaskBarPlugin * tb)
     font_height *= 4;
     font_height /= 3;
     font_height += 2 * LAUNCHBAR_ICON_TRIM;
+    int icon_size = panel_get_icon_size (tb->panel);
     
-    if (tb->icon_size > font_height) font_height = tb->icon_size;
-    
+    if (icon_size > font_height) font_height = icon_size;
     panel_icon_grid_set_geometry(PANEL_ICON_GRID(tb->tb_icon_grid),
         panel_get_orientation(tb->panel),
         ((tb->icons_only) ? tb->icon_size + ICON_ONLY_EXTRA : tb->task_width_max),
