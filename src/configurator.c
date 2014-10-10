@@ -1394,8 +1394,8 @@ void _panel_show_config_dialog(LXPanel *panel, GtkWidget *p, GtkWidget *dlg)
     gtk_window_set_transient_for(GTK_WINDOW(dlg), GTK_WINDOW(panel));
 //    gtk_window_iconify(GTK_WINDOW(dlg));
     gtk_widget_show(dlg);
-    lxpanel_plugin_popup_set_position_helper(panel, p, dlg, &x, &y);
-    gdk_window_move(gtk_widget_get_window(dlg), x, y);
+    //lxpanel_plugin_popup_set_position_helper(panel, p, dlg, &x, &y);
+    //gdk_window_move(gtk_widget_get_window(dlg), x, y);
 
     gtk_window_present(GTK_WINDOW(dlg));
 }
