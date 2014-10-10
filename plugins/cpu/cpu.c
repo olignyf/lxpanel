@@ -45,6 +45,7 @@ struct cpu_stat {
 /* Private context for CPU plugin. */
 typedef struct {
     GdkColor foreground_color;			/* Foreground color for drawing area */
+    GdkColor background_color;			/* Background color for drawing area */
     GtkWidget * da;				/* Drawing area */
     cairo_surface_t * pixmap;				/* Pixmap to be drawn on drawing area */
 
@@ -71,7 +72,7 @@ static void redraw_pixmap(CPUPlugin * c)
     cairo_set_line_width (cr, 1.0);
     /* Erase pixmap. */
     cairo_rectangle(cr, 0, 0, c->pixmap_width, c->pixmap_height);
-    gdk_cairo_set_source_color(cr, &style->black);
+    gdk_cairo_set_source_color(cr, &c->background_color);
     cairo_fill(cr);
 
     /* Recompute pixmap. */
@@ -93,6 +94,27 @@ static void redraw_pixmap(CPUPlugin * c)
         if (drawing_cursor >= c->pixmap_width)
             drawing_cursor = 0;
     }
+
+    /* draw a border in black */
+    cairo_set_source_rgb(cr, 0, 0, 0);
+    cairo_set_line_width(cr, 1);
+    cairo_move_to(cr, 0, 0);
+    cairo_line_to(cr, 0, c->pixmap_height);
+    cairo_line_to(cr, c->pixmap_width, c->pixmap_height);
+    cairo_line_to(cr, c->pixmap_width, 0);
+    cairo_line_to(cr, 0, 0);
+    cairo_stroke(cr);
+
+	#define FONT_SIZE 12
+    char buffer[10];
+    int val = 100 * c->stats_cpu[c->ring_cursor - 1];
+    sprintf (buffer, "%3d %%", val);
+    cairo_select_font_face (cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    cairo_set_font_size (cr, FONT_SIZE);
+    cairo_set_source_rgb (cr, 0, 0, 0);
+    cairo_move_to (cr, 5, ((c->pixmap_height + FONT_SIZE) / 2) - 1);
+    cairo_show_text (cr, buffer);
+
 
     /* check_cairo_status(cr); */
     cairo_destroy(cr);
@@ -217,7 +239,7 @@ static gboolean expose_event(GtkWidget * widget, GdkEventExpose * event, CPUPlug
         GtkStyle * style = gtk_widget_get_style(c->da);
         gdk_cairo_region(cr, event->region);
         cairo_clip(cr);
-        gdk_cairo_set_source_color(cr, &style->black);
+        gdk_cairo_set_source_color(cr, &c->foreground_color);
         cairo_set_source_surface(cr, c->pixmap,
               BORDER_SIZE, BORDER_SIZE);
         cairo_paint(cr);
@@ -242,13 +264,14 @@ static GtkWidget *cpu_constructor(LXPanel *panel, config_setting_t *settings)
 
     /* Allocate drawing area as a child of top level widget.  Enable button press events. */
     c->da = gtk_drawing_area_new();
-    gtk_widget_set_size_request(c->da, 40, PANEL_HEIGHT_DEFAULT);
+    gtk_widget_set_size_request(c->da, 50, PANEL_HEIGHT_DEFAULT);
     gtk_widget_add_events(c->da, GDK_BUTTON_PRESS_MASK);
     gtk_container_add(GTK_CONTAINER(p), c->da);
 
     /* Clone a graphics context and set "green" as its foreground color.
      * We will use this to draw the graph. */
-    gdk_color_parse("green",  &c->foreground_color);
+    gdk_color_parse("dark gray",  &c->foreground_color);
+    gdk_color_parse("light gray",  &c->background_color);
 
     /* Connect signals. */
     g_signal_connect(G_OBJECT(c->da), "configure-event", G_CALLBACK(configure_event), (gpointer) c);
