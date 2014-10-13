@@ -706,7 +706,7 @@ static void show_system_menu(GtkWidget *p)
     if (m->has_system_menu && m->show_system_menu_idle == 0)
         /* FIXME: I've no idea why this doesn't work without timeout
                               under some WMs, like icewm. */
-        m->show_system_menu_idle = g_timeout_add(200, show_system_menu_idle, m);
+        m->show_system_menu_idle = g_timeout_add(10, show_system_menu_idle, m);
 }
 
 static gboolean
@@ -984,6 +984,20 @@ read_include(Plugin *p, char **fp)
 }
 #endif
 
+gboolean check_close (GtkWidget *widget, GdkEventKey *event, gpointer userdata)
+{
+	FILE *fp = fopen ("/home/pi/log.txt", "ab+");
+	fprintf (fp, "%d %d\n", event->keyval, event->state);
+	fclose (fp);
+
+	if (event->keyval == 65482 && event->state == 0)
+	{
+		gtk_menu_popdown (GTK_MENU (userdata));
+		return TRUE;
+	}
+	return FALSE;
+}
+
 static GtkWidget *
 read_submenu(menup *m, config_setting_t *s, int as_item)
 {
@@ -997,6 +1011,8 @@ read_submenu(menup *m, config_setting_t *s, int as_item)
 
     menu = gtk_menu_new ();
     gtk_container_set_border_width(GTK_CONTAINER(menu), 0);
+    
+    g_signal_connect(menu, "key-press-event", G_CALLBACK(check_close), menu);
 
     fname = NULL;
     name = NULL;
