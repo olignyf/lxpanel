@@ -55,6 +55,8 @@ typedef struct {
     guint pixmap_width;				/* Width of drawing area pixmap; also size of ring buffer; does not include border size */
     guint pixmap_height;			/* Height of drawing area pixmap; does not include border size */
     struct cpu_stat previous_cpu_stat;		/* Previous value of cpu_stat */
+    gboolean show_percentage;				/* Display usage as a percentage */
+    config_setting_t *settings;
 } CPUPlugin;
 
 static void redraw_pixmap(CPUPlugin * c);
@@ -104,17 +106,19 @@ static void redraw_pixmap(CPUPlugin * c)
     cairo_line_to(cr, c->pixmap_width, 0);
     cairo_line_to(cr, 0, 0);
     cairo_stroke(cr);
-
-	#define FONT_SIZE 12
-    char buffer[10];
-    int val = 100 * c->stats_cpu[c->ring_cursor - 1];
-    sprintf (buffer, "%3d %%", val);
-    cairo_select_font_face (cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
-    cairo_set_font_size (cr, FONT_SIZE);
-    cairo_set_source_rgb (cr, 0, 0, 0);
-    cairo_move_to (cr, 5, ((c->pixmap_height + FONT_SIZE) / 2) - 1);
-    cairo_show_text (cr, buffer);
-
+	
+	if (c->show_percentage)
+	{
+		#define FONT_SIZE 12
+    	char buffer[10];
+    	int val = 100 * c->stats_cpu[c->ring_cursor - 1];
+    	sprintf (buffer, "%3d %%", val);
+    	cairo_select_font_face (cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+    	cairo_set_font_size (cr, FONT_SIZE);
+    	cairo_set_source_rgb (cr, 0, 0, 0);
+    	cairo_move_to (cr, 5, ((c->pixmap_height + FONT_SIZE) / 2) - 1);
+    	cairo_show_text (cr, buffer);
+	}
 
     /* check_cairo_status(cr); */
     cairo_destroy(cr);
@@ -255,6 +259,11 @@ static GtkWidget *cpu_constructor(LXPanel *panel, config_setting_t *settings)
     /* Allocate plugin context and set into Plugin private data pointer. */
     CPUPlugin * c = g_new0(CPUPlugin, 1);
     GtkWidget * p;
+    int tmp_int;
+
+	c->settings = settings;
+    if (config_setting_lookup_int(settings, "ShowPercent", &tmp_int))
+        c->show_percentage = tmp_int != 0;
 
     /* Allocate top level widget and set into Plugin widget pointer. */
     p = gtk_event_box_new();
@@ -297,11 +306,29 @@ static void cpu_destructor(gpointer user_data)
     g_free(c);
 }
 
+static gboolean cpu_apply_configuration (gpointer user_data)
+{
+    GtkWidget * p = user_data;
+    CPUPlugin * c = lxpanel_plugin_get_data(p);
+    config_group_set_int(c->settings, "ShowPercent", c->show_percentage);
+}
+
+/* Callback when the configuration dialog is to be shown. */
+static GtkWidget *cpu_configure(LXPanel *panel, GtkWidget *p)
+{
+    CPUPlugin * dc = lxpanel_plugin_get_data(p);
+    return lxpanel_generic_config_dlg(_("CPU Usage"), panel,
+        cpu_apply_configuration, p,
+        _("Show usage as percentage"), &dc->show_percentage, CONF_TYPE_BOOL,
+        NULL);
+}
+
 FM_DEFINE_MODULE(lxpanel_gtk, cpu)
 
 /* Plugin descriptor. */
 LXPanelPluginInit fm_module_init_lxpanel_gtk = {
     .name = N_("CPU Usage Monitor"),
+    .config = cpu_configure,
     .description = N_("Display CPU usage"),
     .new_instance = cpu_constructor,
 };
