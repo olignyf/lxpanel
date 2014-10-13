@@ -59,6 +59,27 @@ typedef struct {
     char * prev_tooltip_value;			/* Previous value of tooltip */
 } DClockPlugin;
 
+static gchar *dclock_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
+        "{\n"
+        "GtkWidget::focus-line-width=0\n"
+        "GtkWidget::focus-padding=0\n"
+        "GtkButton::default-border={0,0,0,0}\n"
+        "GtkButton::default-outside-border={0,0,0,0}\n"
+        "GtkButton::inner-border={0,0,0,0}\n"
+        "}\n"
+        "widget '*launchbar.*' style 'launchtaskbar-style'\n"
+        "widget '*taskbar.*' style 'launchtaskbar-style'\n"
+		"style 'button'\n"
+		"{\n"
+		"bg[PRELIGHT]=@selected_bg_color\n"
+		"}\n"
+//		"style 'label'\n"
+//		"{\n"
+//		"fg[PRELIGHT]=@selected_fg_color\n"
+//		"}\n"
+;
+
+
 static gboolean dclock_update_display(DClockPlugin * dc);
 static void dclock_destructor(gpointer user_data);
 static gboolean dclock_apply_configuration(gpointer user_data);
@@ -283,6 +304,8 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     GtkWidget * p;
     const char *str;
     int tmp_int;
+    
+    gtk_rc_parse_string(dclock_rc);
 
     /* Load parameters from the configuration file. */
     if (config_setting_lookup_string(settings, "ClockFmt", &str))
@@ -303,7 +326,9 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     dc->settings = settings;
 
     /* Allocate top level widget and set into Plugin widget pointer. */
-    dc->plugin = p = gtk_event_box_new();
+    //dc->plugin = p = gtk_event_box_new();
+    dc->plugin = p = gtk_button_new();
+    gtk_button_set_relief (GTK_BUTTON (p), GTK_RELIEF_NONE);
     lxpanel_plugin_set_data(p, dc, dclock_destructor);
 
     /* Allocate a horizontal box as the child of the top level. */
@@ -316,10 +341,16 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     dc->clock_label = gtk_label_new(NULL);
     gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.5, 0.5);
     gtk_misc_set_padding(GTK_MISC(dc->clock_label), 4, 0);
+    
+    /* set the text colour on mouse over */
+	gtk_widget_realize (panel);
+	GdkColor colorf = gtk_widget_get_style(panel)->fg[GTK_STATE_SELECTED];
+    gtk_widget_modify_fg (dc->clock_label, GTK_STATE_PRELIGHT, &colorf); 
+    
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_label);
     dc->clock_icon = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_icon);
-
+    
     /* Initialize the clock display. */
     if (dc->clock_format == NULL)
         dc->clock_format = g_strdup(_(DEFAULT_CLOCK_FORMAT));
