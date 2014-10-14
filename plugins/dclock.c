@@ -473,7 +473,7 @@ LXPanelPluginInit lxpanel_static_plugin_dclock = {
     .description = N_("Display digital clock and tooltip"),
 
     .new_instance = dclock_constructor,
-    .config = dclock_configure,
+//    .config = dclock_configure,
     .reconfigure = dclock_reconfigure,
     .button_press_event = dclock_button_press_event
 };

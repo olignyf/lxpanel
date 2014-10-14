@@ -3550,7 +3550,7 @@ static LXPanelPluginInit _taskbar_init = {
     .expand_default = TRUE,
 
     .new_instance = taskbar_constructor,
-    .config = launchtaskbar_configure,
+//    .config = launchtaskbar_configure,
     .reconfigure = launchtaskbar_panel_configuration_changed
 };
 
