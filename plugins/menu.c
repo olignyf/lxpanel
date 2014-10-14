@@ -477,6 +477,18 @@ static GtkWidget* create_item(MenuCacheItem *item, menup *m)
     return mi;
 }
 
+gboolean check_close (GtkWidget *widget, GdkEventKey *event, gpointer userdata)
+{
+	if (event->keyval == 65482 && event->state == 0)
+	{
+		gtk_menu_popdown (GTK_MENU (userdata));
+		return TRUE;
+	}
+	return FALSE;
+}
+
+
+
 static int load_menu(menup* m, MenuCacheDir* dir, GtkWidget* menu, int pos )
 {
     GSList * l;
@@ -518,7 +530,8 @@ static int load_menu(menup* m, MenuCacheDir* dir, GtkWidget* menu, int pos )
 		/* process subentries */
 		if (menu_cache_item_get_type(item) == MENU_CACHE_TYPE_DIR)
 		{
-                    GtkWidget* sub = gtk_menu_new();
+            GtkWidget* sub = gtk_menu_new();
+    		g_signal_connect(sub, "key-press-event", G_CALLBACK(check_close), m->menu);
 		    /*  always pass -1 for position */
 		    gint s_count = load_menu( m, MENU_CACHE_DIR(item), sub, -1 );
                     if (s_count)
@@ -702,11 +715,11 @@ static gboolean show_system_menu_idle(gpointer user_data)
 static void show_system_menu(GtkWidget *p)
 {
     menup *m = lxpanel_plugin_get_data(p);
-
-    if (m->has_system_menu && m->show_system_menu_idle == 0)
+	if (m->has_system_menu) show_menu( m->img, m, 0, GDK_CURRENT_TIME );
+    //if (m->has_system_menu && m->show_system_menu_idle == 0)
         /* FIXME: I've no idea why this doesn't work without timeout
                               under some WMs, like icewm. */
-        m->show_system_menu_idle = g_timeout_add(10, show_system_menu_idle, m);
+    //    m->show_system_menu_idle = g_timeout_add(200, show_system_menu_idle, m);
 }
 
 static gboolean
@@ -983,20 +996,6 @@ read_include(Plugin *p, char **fp)
     RET();
 }
 #endif
-
-gboolean check_close (GtkWidget *widget, GdkEventKey *event, gpointer userdata)
-{
-	FILE *fp = fopen ("/home/pi/log.txt", "ab+");
-	fprintf (fp, "%d %d\n", event->keyval, event->state);
-	fclose (fp);
-
-	if (event->keyval == 65482 && event->state == 0)
-	{
-		gtk_menu_popdown (GTK_MENU (userdata));
-		return TRUE;
-	}
-	return FALSE;
-}
 
 static GtkWidget *
 read_submenu(menup *m, config_setting_t *s, int as_item)
