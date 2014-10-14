@@ -1152,12 +1152,14 @@ static gboolean apply_config(GtkWidget *p)
         /* Locate the image within the button. */
     	GtkWidget * child = gtk_bin_get_child(GTK_BIN(m->img));
     	GtkWidget * img = NULL;
+    	GtkWidget *label = NULL;
     	if (GTK_IS_IMAGE(child))
         	img = child;
     	else if (GTK_IS_BOX(child))
     	{
         	GList * children = gtk_container_get_children(GTK_CONTAINER(child));
         	img = GTK_WIDGET(GTK_IMAGE(children->data));
+        	label = GTK_WIDGET(GTK_LABEL(children->next->data));
         	g_list_free(children);
     	}
 
@@ -1168,8 +1170,12 @@ static gboolean apply_config(GtkWidget *p)
     		gtk_misc_set_padding(GTK_MISC(m->icon), 0, 0);
     		g_object_unref(pixbuf);
     	}
-    
+    	if (label != NULL)
+    	{
+    		gtk_label_set_text (GTK_LABEL(label), m->caption);
+    	}
     }
+    
     config_group_set_string(m->settings, "image", m->fname);
     config_group_set_string(m->settings, "name", m->caption);
 
