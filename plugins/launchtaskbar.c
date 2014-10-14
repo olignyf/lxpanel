@@ -189,6 +189,7 @@ struct LaunchTaskBarPlugin {
     gboolean         tb_built;
     gboolean         fixed_mode;        /* if mode cannot be changed */
 	LaunchButton	*lastb;
+	guint			timeout;
 };
 
 static gchar *launchtaskbar_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
@@ -342,21 +343,41 @@ static void launchbutton_free(LaunchButton * btn)
     g_free(btn);
 }
 
+static gboolean unlock_button (gpointer user_data)
+{
+	/* handler for launch dead period timeout following click on launchbar */
+    LaunchTaskBarPlugin *ltbp = (LaunchTaskBarPlugin *) user_data;
+    ltbp->timeout = 0;
+    return FALSE;
+}
+
 /* Handler for "button-press-event" event from launchtaskbar button. */
 //static gboolean launchbutton_press_event(GtkWidget * widget, GdkEventButton * event, LaunchButton * b)
 static gboolean launchbutton_press_event(GtkWidget * widget, GdkEventButton * event, LXPanel * p)
 {
     LaunchTaskBarPlugin *ltbp = lxpanel_plugin_get_data(widget);
     
-    if (event->button == 1 && event->type == GDK_BUTTON_PRESS) /* left button */
+    if (ltbp->timeout == 0)
     {
-        if (ltbp->lastb->fi == NULL)  /* The bootstrap button */
-            lxpanel_plugin_show_config_dialog(ltbp->lastb->p->plugin);
-        else
-            lxpanel_launch_path(p, fm_file_info_get_path(ltbp->lastb->fi));
-        return TRUE;
+        ltbp->timeout = g_timeout_add (1000, unlock_button, ltbp);
+    
+    	if (event->button == 1 && event->type == GDK_BUTTON_PRESS) /* left button */
+    	{
+        	if (ltbp->lastb->fi == NULL)  /* The bootstrap button */
+            	lxpanel_plugin_show_config_dialog(ltbp->lastb->p->plugin);
+        	else
+            	lxpanel_launch_path(p, fm_file_info_get_path(ltbp->lastb->fi));
+        	return TRUE;
+    	}
+    	return FALSE;
     }
-    return FALSE;
+    else 
+    {
+    	/* restart a new timer */
+    	g_source_remove (ltbp->timeout);
+    	ltbp->timeout = g_timeout_add (1000, unlock_button, ltbp);
+    	return TRUE;
+    }
 }
 
 static gboolean pass_signal(GtkWidget *widget, GdkEventButton *event, LaunchButton *btn)
