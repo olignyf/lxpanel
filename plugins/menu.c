@@ -62,6 +62,7 @@
 
 typedef struct {
     GtkWidget *menu, *box, *img, *label, *icon;
+    GtkWidget *grid;
     char *fname, *caption;
     gulong handler_id;
     int iconsize;
@@ -92,6 +93,8 @@ static gchar *menu_rc = "style 'menu-style'\n"
 "widget '*.menu.*' style 'menu-style'";
 
 #define ICON_BUTTON_YTRIM 6
+#define MENU_BUTTON_PAD	8
+#define BUTTON_WIDTH 10
 
 /* FIXME: this is defined in misc.c and should be replaced later */
 GtkWidget *_gtk_image_new_from_file_scaled(const gchar *file, gint width,
@@ -834,7 +837,17 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     gtk_container_set_border_width(GTK_CONTAINER(m->img), 0);
   	
     gtk_widget_show(m->img);
-    gtk_box_pack_start(GTK_BOX(m->box), m->img, FALSE, FALSE, 0);
+
+	GtkRequisition req;
+    gtk_widget_size_request (m->img, &req);
+
+    panel_icon_grid_set_geometry(m->grid,
+                                     panel_get_orientation(m->panel),
+                                     req.width + MENU_BUTTON_PAD, panel_get_icon_size(m->panel), 0, 0,
+                                     panel_get_height(m->panel));
+
+    gtk_container_add(GTK_CONTAINER(m->grid), m->img);
+    //gtk_box_pack_start(GTK_BOX(m->box), m->img, FALSE, FALSE, 0);
 
     //m->handler_id = g_signal_connect (G_OBJECT (m->img), "button-press-event",
     //      G_CALLBACK (my_button_pressed), p);
@@ -1100,6 +1113,14 @@ menu_constructor(LXPanel *panel, config_setting_t *settings)
     lxpanel_plugin_set_data(m->box, m, menu_destructor);
     gtk_container_set_border_width(GTK_CONTAINER(m->box), 0);
 
+	// width of 50 is just a placeholder; it gets overwritten in read_submenu / make_button...
+    m->grid = panel_icon_grid_new(panel_get_orientation(panel),
+                                             50, panel_get_icon_size(panel),
+                                             3, 0, panel_get_height(panel));
+    gtk_container_set_border_width(GTK_CONTAINER(m->grid), 0);
+    gtk_box_pack_start(GTK_BOX(m->box), m->grid, FALSE, TRUE, 0);
+    gtk_widget_set_visible(m->grid, TRUE);
+
     /* Save construction pointers */
     m->panel = panel;
     m->settings = settings;
@@ -1135,6 +1156,7 @@ menu_constructor(LXPanel *panel, config_setting_t *settings)
 static gboolean apply_config(GtkWidget *p)
 {
     menup* m = lxpanel_plugin_get_data(p);
+    int newwidth = 0;
     
     /* update the local icon size parameter */
     int iw = panel_get_icon_size(m->panel);
@@ -1153,6 +1175,7 @@ static gboolean apply_config(GtkWidget *p)
     	GtkWidget * child = gtk_bin_get_child(GTK_BIN(m->img));
     	GtkWidget * img = NULL;
     	GtkWidget *label = NULL;
+    	GtkRequisition req;
     	if (GTK_IS_IMAGE(child))
         	img = child;
     	else if (GTK_IS_BOX(child))
@@ -1169,13 +1192,22 @@ static gboolean apply_config(GtkWidget *p)
     		gtk_image_set_from_pixbuf(GTK_IMAGE(m->icon), pixbuf);
     		gtk_misc_set_padding(GTK_MISC(m->icon), 0, 0);
     		g_object_unref(pixbuf);
+    		gtk_widget_size_request (m->icon, &req);
+    		newwidth += req.width;
     	}
     	if (label != NULL)
     	{
     		gtk_label_set_text (GTK_LABEL(label), m->caption);
+    		gtk_widget_size_request (label, &req);
+    		newwidth += req.width;
     	}
     }
     
+    panel_icon_grid_set_geometry(m->grid,
+                                     panel_get_orientation(m->panel),
+                                     newwidth + BUTTON_WIDTH + MENU_BUTTON_PAD + 1, panel_get_icon_size(m->panel), 0, 0,
+                                     panel_get_height(m->panel));
+
     config_group_set_string(m->settings, "image", m->fname);
     config_group_set_string(m->settings, "name", m->caption);
 

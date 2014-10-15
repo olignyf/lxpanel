@@ -2767,19 +2767,10 @@ static void taskbar_button_size_allocate(GtkWidget * btn, GtkAllocation * alloc,
 /* Update style on the taskbar when created or after a configuration change. */
 static void taskbar_update_style(LaunchTaskBarPlugin * tb)
 {
-    GtkStyle *style = gtk_widget_get_style(tb->panel);    
-    int font_height = pango_font_description_get_size (style->font_desc) / PANGO_SCALE;
-    // scale from points to pixels
-    font_height *= 4;
-    font_height /= 3;
-    font_height += 2 * LAUNCHBAR_ICON_TRIM;
-    int icon_size = panel_get_icon_size (tb->panel);
-    
-    if (icon_size > font_height) font_height = icon_size;
     panel_icon_grid_set_geometry(PANEL_ICON_GRID(tb->tb_icon_grid),
         panel_get_orientation(tb->panel),
         ((tb->icons_only) ? tb->icon_size + ICON_ONLY_EXTRA : tb->task_width_max),
-        font_height, tb->spacing, 0, panel_get_height(tb->panel));
+        panel_get_icon_size (tb->panel), tb->spacing, 0, panel_get_height(tb->panel));
 }
 
 /* Update style on a task button when created or after a configuration change. */
