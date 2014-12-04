@@ -201,16 +201,7 @@ static gchar *launchtaskbar_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
         "GtkButton::inner-border={0,0,0,0}\n"
         "}\n"
         "widget '*launchbar.*' style 'launchtaskbar-style'\n"
-        "widget '*taskbar.*' style 'launchtaskbar-style'\n"
-		"style 'button'\n"
-		"{\n"
-		"bg[PRELIGHT]=@selected_bg_color\n"
-		"}\n"
-//		"style 'label'\n"
-//		"{\n"
-//		"fg[PRELIGHT]=@selected_fg_color\n"
-//		"}\n"
-;
+        "widget '*taskbar.*' style 'launchtaskbar-style'";
 
 #define DRAG_ACTIVE_DELAY    1000
 #define TASK_WIDTH_MAX       200

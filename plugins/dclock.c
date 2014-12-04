@@ -59,27 +59,6 @@ typedef struct {
     char * prev_tooltip_value;			/* Previous value of tooltip */
 } DClockPlugin;
 
-static gchar *dclock_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
-        "{\n"
-        "GtkWidget::focus-line-width=0\n"
-        "GtkWidget::focus-padding=0\n"
-        "GtkButton::default-border={0,0,0,0}\n"
-        "GtkButton::default-outside-border={0,0,0,0}\n"
-        "GtkButton::inner-border={0,0,0,0}\n"
-        "}\n"
-        "widget '*launchbar.*' style 'launchtaskbar-style'\n"
-        "widget '*taskbar.*' style 'launchtaskbar-style'\n"
-		"style 'button'\n"
-		"{\n"
-		"bg[PRELIGHT]=@selected_bg_color\n"
-		"}\n"
-//		"style 'label'\n"
-//		"{\n"
-//		"fg[PRELIGHT]=@selected_fg_color\n"
-//		"}\n"
-;
-
-
 static gboolean dclock_update_display(DClockPlugin * dc);
 static void dclock_destructor(gpointer user_data);
 static gboolean dclock_apply_configuration(gpointer user_data);
@@ -304,8 +283,6 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     GtkWidget * p;
     const char *str;
     int tmp_int;
-    
-    gtk_rc_parse_string(dclock_rc);
 
     /* Load parameters from the configuration file. */
     if (config_setting_lookup_string(settings, "ClockFmt", &str))
@@ -350,7 +327,7 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_label);
     dc->clock_icon = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_icon);
-    
+
     /* Initialize the clock display. */
     if (dc->clock_format == NULL)
         dc->clock_format = g_strdup(_(DEFAULT_CLOCK_FORMAT));
