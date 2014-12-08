@@ -783,11 +783,6 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     m->img = gtk_button_new();
     gtk_container_set_border_width(GTK_CONTAINER(m->img), 0);
     
-    /* set the background colour on mouse-over */	
-  	//gtk_widget_realize (menu);
-	//GdkColor colorb = gtk_widget_get_style(menu)->bg[GTK_STATE_SELECTED];
-  	//gtk_widget_modify_bg (m->img, GTK_STATE_PRELIGHT, &colorb);
-  	
     /* Create a box to contain the application icon and window title. */
     GtkWidget * container = gtk_hbox_new(FALSE, 1);
     gtk_container_set_border_width(GTK_CONTAINER(container), 0);
