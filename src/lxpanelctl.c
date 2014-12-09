@@ -36,6 +36,7 @@ static const char usage[] =
         "run\tshow run dialog\n"
         "config\tshow configuration dialog\n"
         "restart\trestart lxpanel\n"
+        "refresh\trefresh lxpanel\n"
         "exit\texit lxpanel\n\n";
 
 static int get_cmd( const char* cmd )
@@ -50,6 +51,8 @@ static int get_cmd( const char* cmd )
         return LXPANEL_CMD_RESTART;
     else if( ! strcmp( cmd, "exit") )
         return LXPANEL_CMD_EXIT;
+    else if( ! strcmp( cmd, "refresh") )
+        return LXPANEL_CMD_REFRESH;
     return -1;
 }
 

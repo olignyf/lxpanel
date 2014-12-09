@@ -28,7 +28,8 @@ typedef enum {
     LXPANEL_CMD_RUN,
     LXPANEL_CMD_CONFIG,
     LXPANEL_CMD_RESTART,
-    LXPANEL_CMD_EXIT
+    LXPANEL_CMD_EXIT,
+    LXPANEL_CMD_REFRESH
 } PanelControlCommand;
 
 #endif
