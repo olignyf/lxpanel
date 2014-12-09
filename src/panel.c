@@ -62,6 +62,7 @@ static void ah_stop(LXPanel *p);
 static void on_root_bg_changed(FbBg *bg, LXPanel* p);
 
 
+
 G_DEFINE_TYPE(PanelToplevel, lxpanel, GTK_TYPE_WINDOW);
 
 static void lxpanel_finalize(GObject *object)
@@ -463,6 +464,28 @@ static void process_client_msg ( XClientMessageEvent* ev )
             break;
         case LXPANEL_CMD_EXIT:
             gtk_main_quit();
+            break;
+        case LXPANEL_CMD_REFRESH:
+            {
+            	LXPanel * p = ((all_panels != NULL) ? all_panels->data : NULL);
+            	if (p != NULL)
+            	{
+            		// at some point I may need to read some more parameters here, but this will do for now...
+					char linebuf[256];
+					int val;
+					FILE *fp = fopen (_user_config_file_name ("panels", p->priv->name), "rb");
+					while (!feof (fp))
+					{
+						if (fgets (linebuf, 256, fp))
+							if (sscanf (linebuf, "  iconsize=%d", &val) == 1)
+							{
+								p->priv->icon_size = val;
+								p->priv->height = val;
+							}
+					}
+					panel_set_panel_configuration_changed(p->priv);
+            	}
+            }
             break;
     }
 }
@@ -1693,7 +1716,7 @@ static void _start_panels_from_dir(const char *panel_dir)
     while((name = g_dir_read_name(dir)) != NULL)
     {
         char* panel_config = g_build_filename( panel_dir, name, NULL );
-        if (strchr(panel_config, '~') == NULL)    /* Skip editor backup files in case user has hand edited in this directory */
+        if (strchr(panel_config, '~') == NULL && name[0] != '.')    /* Skip editor backup files in case user has hand edited in this directory */
         {
             LXPanel* panel = panel_new( panel_config, name );
             if( panel )
