@@ -57,6 +57,7 @@ typedef struct {
     int experiment_count;			/* Count of experiments that have been done to determine interval */
     char * prev_clock_value;			/* Previous value of clock */
     char * prev_tooltip_value;			/* Previous value of tooltip */
+    GtkWidget *box, *grid;
 } DClockPlugin;
 
 static gboolean dclock_update_display(DClockPlugin * dc);
@@ -275,14 +276,23 @@ static gboolean dclock_update_display(DClockPlugin * dc)
     return FALSE;
 }
 
+static gboolean
+pass_signal(GtkWidget *widget, GdkEventButton *event, DClockPlugin *dc)
+{
+	gboolean res;
+	g_signal_emit_by_name (G_OBJECT(dc->box), "button-press-event", event, &res);
+	return TRUE;
+}
+
 /* Plugin constructor. */
 static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
 {
     /* Allocate and initialize plugin context and set into Plugin private data pointer. */
     DClockPlugin * dc = g_new0(DClockPlugin, 1);
-    GtkWidget * p;
     const char *str;
     int tmp_int;
+
+    gtk_rc_parse_string ("style 'button-style'\n{\nGtkWidget::focus-padding=0\nGtkWidget::focus-line-width=0\nGtkWidget::focus-padding=0\nGtkButton::default-border={0,0,0,0}\nGtkButton::default-outside-border={0,0,0,0}\nGtkButton::inner-border={0,0,0,0}\n}\nwidget '*' style 'button-style'");    
 
     /* Load parameters from the configuration file. */
     if (config_setting_lookup_string(settings, "ClockFmt", &str))
@@ -303,21 +313,32 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     dc->settings = settings;
 
     /* Allocate top level widget and set into Plugin widget pointer. */
-    //dc->plugin = p = gtk_event_box_new();
-    dc->plugin = p = gtk_button_new();
-    gtk_button_set_relief (GTK_BUTTON (p), GTK_RELIEF_NONE);
-    lxpanel_plugin_set_data(p, dc, dclock_destructor);
+    dc->box = gtk_vbox_new (TRUE, 0);
+    lxpanel_plugin_set_data (dc->box, dc, dclock_destructor);
+    gtk_container_set_border_width (GTK_CONTAINER (dc->box), 0);
+
+	// width of 50 is just a placeholder; it gets overwritten later...
+    dc->grid = panel_icon_grid_new (panel_get_orientation (panel), 50, panel_get_icon_size (panel),
+    	3, 0, panel_get_height (panel));
+    gtk_container_set_border_width (GTK_CONTAINER (dc->grid), 0);
+    gtk_box_pack_start (GTK_BOX (dc->box), dc->grid, FALSE, TRUE, 0);
+    gtk_widget_set_visible (dc->grid, TRUE);
+    
+    dc->plugin = gtk_button_new ();
+    g_signal_connect (G_OBJECT (dc->plugin), "button-press-event", G_CALLBACK (pass_signal), dc);
+    gtk_widget_set_visible (dc->plugin, TRUE);
+    gtk_button_set_relief (GTK_BUTTON (dc->plugin), GTK_RELIEF_NONE);
+    gtk_container_add (GTK_CONTAINER(dc->grid), dc->plugin);
 
     /* Allocate a horizontal box as the child of the top level. */
     GtkWidget * hbox = gtk_hbox_new(TRUE, 0);
-    gtk_container_add(GTK_CONTAINER(p), hbox);
+    gtk_container_add(GTK_CONTAINER(dc->plugin), hbox);
     gtk_widget_show(hbox);
 
     /* Create a label and an image as children of the horizontal box.
      * Only one of these is visible at a time, controlled by user preference. */
     dc->clock_label = gtk_label_new(NULL);
     gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.5, 0.5);
-    gtk_misc_set_padding(GTK_MISC(dc->clock_label), 4, 0);
     
     /* set the text colour on mouse over */
 	gtk_widget_realize (panel);
@@ -333,10 +354,11 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
         dc->clock_format = g_strdup(_(DEFAULT_CLOCK_FORMAT));
     if (dc->tooltip_format == NULL)
         dc->tooltip_format = g_strdup(_(DEFAULT_TIP_FORMAT));
-    dclock_apply_configuration(p);
+
+    dclock_apply_configuration(dc->box);
 
     /* Show the widget and return. */
-    return p;
+    return dc->box;
 }
 
 /* Plugin destructor. */
@@ -411,6 +433,14 @@ static gboolean dclock_apply_configuration(gpointer user_data)
         gtk_widget_destroy(dc->calendar_window);
         dc->calendar_window = NULL;
     }
+    
+    GtkRequisition req;
+    gtk_widget_size_request (dc->plugin, &req);
+    panel_icon_grid_set_geometry(dc->grid,
+                                     panel_get_orientation(dc->panel),
+                                     req.width, panel_get_icon_size(dc->panel), 0, 0,
+                                     panel_get_height(dc->panel));
+
 
     /* Save configuration */
     config_group_set_string(dc->settings, "ClockFmt", dc->clock_format);
@@ -419,6 +449,7 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     config_group_set_int(dc->settings, "BoldFont", dc->bold);
     config_group_set_int(dc->settings, "IconOnly", dc->icon_only);
     config_group_set_int(dc->settings, "CenterText", dc->center_text);
+
     return FALSE;
 }
 

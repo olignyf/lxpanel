@@ -81,17 +81,6 @@ static guint idle_loader = 0;
 
 GQuark SYS_MENU_ITEM_ID = 0;
 
-static gchar *menu_rc = "style 'menu-style'\n"
-"{\n"
-"GtkWidget::focus-padding=0\n" /* FIXME: seem to fix #2821771, not sure if this is ok. */
-"GtkWidget::focus-line-width=0\n"
-"GtkWidget::focus-padding=0\n"
-"GtkButton::default-border={0,0,0,0}\n"
-"GtkButton::default-outside-border={0,0,0,0}\n"
-"GtkButton::inner-border={4,4,0,0}\n" /* added in gtk+ 2.10 */
-"}\n"
-"widget '*.menu.*' style 'menu-style'";
-
 #define ICON_BUTTON_YTRIM 6
 #define MENU_BUTTON_PAD	8
 #define BUTTON_WIDTH 10
@@ -777,7 +766,7 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     RET(m->img);
 #endif
     ENTER;
-    gtk_rc_parse_string(menu_rc);
+    gtk_rc_parse_string ("style 'button-style'\n{\nGtkWidget::focus-padding=0\nGtkWidget::focus-line-width=0\nGtkWidget::focus-padding=0\nGtkButton::default-border={0,0,0,0}\nGtkButton::default-outside-border={0,0,0,0}\nGtkButton::inner-border={0,0,0,0}\n}\nwidget '*' style 'button-style'");    
     //m = (menup *)p->priv;
     m->menu = menu;
     m->img = gtk_button_new();
