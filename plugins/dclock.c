@@ -33,6 +33,9 @@
 #define DEFAULT_TIP_FORMAT    "%A %x"
 #define DEFAULT_CLOCK_FORMAT  "%R"
 
+#define ICON_BUTTON_YTRIM 6
+#define MENU_BUTTON_PAD	8
+
 /* Private context for digital clock plugin. */
 typedef struct {
     GtkWidget * plugin;				/* Back pointer to plugin */
@@ -389,7 +392,9 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     GtkWidget * p = user_data;
     DClockPlugin * dc = lxpanel_plugin_get_data(p);
     struct timeval now;
-
+    int newwidth = 0;
+    GtkRequisition req;
+    
     /* stop the updater now */
     if (dc->timer)
         g_source_remove(dc->timer);
@@ -397,16 +402,34 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     /* Set up the icon or the label as the displayable widget. */
     if (dc->icon_only)
     {
-        if(lxpanel_image_set_icon_theme(dc->panel, dc->clock_icon, "clock") != FALSE) {
-            lxpanel_image_set_from_file(dc->panel, dc->clock_icon, PACKAGE_DATA_DIR "/images/clock.png");
-        }
+		GdkPixbuf * pixbuf = gdk_pixbuf_new_from_file_at_scale(PACKAGE_DATA_DIR "/images/clock.png", panel_get_icon_size(dc->panel) - ICON_BUTTON_YTRIM, panel_get_icon_size(dc->panel) - ICON_BUTTON_YTRIM, TRUE, NULL);
+    	if (pixbuf != NULL)
+    	{
+        	gtk_image_set_from_pixbuf(GTK_IMAGE(dc->clock_icon), pixbuf);
+        	g_object_unref(pixbuf);
+    	}
         gtk_widget_show(dc->clock_icon);
         gtk_widget_hide(dc->clock_label);
+        gtk_widget_size_request (dc->clock_icon, &req);
+    	newwidth += req.width + ICON_BUTTON_YTRIM;
     }
     else
     {
+    	/* find how big the button will need to be... */
+    	struct timeval now;
+    	struct tm * current_time;
+    	char clock_value[64];
+    	
+    	gettimeofday (&now, NULL);
+    	current_time = localtime(&now.tv_sec);
+    	clock_value[0] = '\0';
+    	if (dc->clock_format != NULL)
+        	strftime(clock_value, sizeof(clock_value), dc->clock_format, current_time);
+    	gtk_label_set_text (GTK_LABEL(dc->clock_label), clock_value);
         gtk_widget_show(dc->clock_label);
         gtk_widget_hide(dc->clock_icon);
+        gtk_widget_size_request (dc->clock_label, &req);
+    	newwidth += req.width + MENU_BUTTON_PAD;
     }
 
     if (dc->center_text)
@@ -434,13 +457,10 @@ static gboolean dclock_apply_configuration(gpointer user_data)
         dc->calendar_window = NULL;
     }
     
-    GtkRequisition req;
-    gtk_widget_size_request (dc->plugin, &req);
     panel_icon_grid_set_geometry(dc->grid,
                                      panel_get_orientation(dc->panel),
-                                     req.width, panel_get_icon_size(dc->panel), 0, 0,
+                                     newwidth, panel_get_icon_size(dc->panel), 0, 0,
                                      panel_get_height(dc->panel));
-
 
     /* Save configuration */
     config_group_set_string(dc->settings, "ClockFmt", dc->clock_format);
@@ -463,9 +483,9 @@ static GtkWidget *dclock_configure(LXPanel *panel, GtkWidget *p)
         _("Tooltip Format"), &dc->tooltip_format, CONF_TYPE_STR,
         _("Format codes: man 3 strftime; %n for line break"), NULL, CONF_TYPE_TRIM,
         _("Action when clicked (default: display calendar)"), &dc->action, CONF_TYPE_STR,
-        _("Bold font"), &dc->bold, CONF_TYPE_BOOL,
+        //_("Bold font"), &dc->bold, CONF_TYPE_BOOL,
         _("Tooltip only"), &dc->icon_only, CONF_TYPE_BOOL,
-        _("Center text"), &dc->center_text, CONF_TYPE_BOOL,
+        //_("Center text"), &dc->center_text, CONF_TYPE_BOOL,
         NULL);
 }
 
@@ -481,7 +501,7 @@ LXPanelPluginInit lxpanel_static_plugin_dclock = {
     .description = N_("Display digital clock and tooltip"),
 
     .new_instance = dclock_constructor,
-//    .config = dclock_configure,
+    .config = dclock_configure,
     .reconfigure = dclock_reconfigure,
     .button_press_event = dclock_button_press_event
 };
