@@ -1324,6 +1324,24 @@ static void on_toggle_changed( GtkToggleButton* btn, gpointer user_data )
     notify_apply_config( GTK_WIDGET(btn) );
 }
 
+static void on_radio_changed( GtkRadioButton* btn, gpointer user_data )
+{
+    gboolean* val = (gboolean*)user_data;
+    
+    GSList *group = gtk_radio_button_get_group (btn);
+    GtkRadioButton *tbtn;
+    int nbtn = 0, sbtn;
+    while (group)
+    {
+    	tbtn = group->data;
+    	group = group->next;
+    	if (gtk_toggle_button_get_active(tbtn)) sbtn = nbtn;
+    	nbtn++;
+    }
+    *val = nbtn - sbtn - 1;
+    notify_apply_config( GTK_WIDGET(btn) );
+}
+
 static void on_file_chooser_btn_file_set(GtkFileChooser* btn, char** val)
 {
     g_free( *val );
@@ -1420,12 +1438,15 @@ static GtkWidget *_lxpanel_generic_config_dlg(const char *title, Panel *p,
 
     gtk_box_set_spacing( dlg_vbox, 4 );
 
+	int rb_group = 0;
+	GtkWidget *lastbtn;
     while( name )
     {
         GtkWidget* label = gtk_label_new( name );
         GtkWidget* entry = NULL;
         gpointer val = va_arg( args, gpointer );
         PluginConfType type = va_arg( args, PluginConfType );
+        if (rb_group && type != CONF_TYPE_RBUTTON) rb_group = 0;
         switch( type )
         {
             case CONF_TYPE_STR:
@@ -1469,10 +1490,29 @@ static GtkWidget *_lxpanel_generic_config_dlg(const char *title, Panel *p,
                 g_free (markup);
                 }
                 break;
+            case CONF_TYPE_RBUTTON:
+            	if (!rb_group)
+            	{
+            		entry = gtk_radio_button_new_with_label (NULL, name);
+                	g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
+                	gtk_toggle_button_set_active (entry, * (int *) val == rb_group);
+            		gtk_radio_button_group (entry);
+            		lastbtn = entry;
+            		rb_group++;
+            	}
+            	else 
+            	{
+            		entry = gtk_radio_button_new_with_label (gtk_radio_button_group (lastbtn), name); 
+                	g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
+                	gtk_toggle_button_set_active (entry, * (int *) val == rb_group);
+            		lastbtn = entry;
+            		rb_group++;
+            	}
+                break;
         }
         if( entry )
         {
-            if(( type == CONF_TYPE_BOOL ) || ( type == CONF_TYPE_TRIM ))
+            if(( type == CONF_TYPE_BOOL ) || ( type == CONF_TYPE_TRIM ) || (type == CONF_TYPE_RBUTTON))
                 gtk_box_pack_start( dlg_vbox, entry, FALSE, FALSE, 2 );
             else
             {

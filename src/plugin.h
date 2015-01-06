@@ -244,7 +244,8 @@ typedef enum {
     CONF_TYPE_FILE,
     CONF_TYPE_FILE_ENTRY,
     CONF_TYPE_DIRECTORY_ENTRY,
-    CONF_TYPE_TRIM
+    CONF_TYPE_TRIM,
+    CONF_TYPE_RBUTTON
 } PluginConfType;
 
 /**
