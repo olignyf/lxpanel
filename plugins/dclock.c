@@ -49,7 +49,7 @@ typedef struct {
     char * action;				/* Command to execute on a click */
     gboolean bold;				/* True if bold font */
     gboolean icon_only;				/* True if icon only (no clock value) */
-    gboolean center_text;
+    int center_text;
     guint timer;				/* Timer for periodic update */
     enum {
 	AWAITING_FIRST_CHANGE,			/* Experimenting to determine interval, waiting for first change */
@@ -309,7 +309,7 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     if (config_setting_lookup_int(settings, "IconOnly", &tmp_int))
         dc->icon_only = tmp_int != 0;
     if (config_setting_lookup_int(settings, "CenterText", &tmp_int))
-        dc->center_text = tmp_int != 0;
+        dc->center_text = tmp_int;
 
     /* Save construction pointers */
     dc->panel = panel;
@@ -341,11 +341,10 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     /* Create a label and an image as children of the horizontal box.
      * Only one of these is visible at a time, controlled by user preference. */
     dc->clock_label = gtk_label_new(NULL);
-    gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.5, 0.5);
     
     /* set the text colour on mouse over */
-	gtk_widget_realize (panel);
-	GdkColor colorf = gtk_widget_get_style(panel)->fg[GTK_STATE_SELECTED];
+	gtk_widget_realize (GTK_WIDGET(&(panel->window)));
+	GdkColor colorf = gtk_widget_get_style (GTK_WIDGET(&(panel->window)))->fg[GTK_STATE_SELECTED];
     gtk_widget_modify_fg (dc->clock_label, GTK_STATE_PRELIGHT, &colorf); 
     
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_label);
@@ -411,35 +410,93 @@ static gboolean dclock_apply_configuration(gpointer user_data)
         gtk_widget_show(dc->clock_icon);
         gtk_widget_hide(dc->clock_label);
         gtk_widget_size_request (dc->clock_icon, &req);
-    	newwidth += req.width + ICON_BUTTON_YTRIM;
+    	newwidth = req.width + ICON_BUTTON_YTRIM;
     }
     else
     {
     	/* find how big the button will need to be... */
     	struct timeval now;
-    	struct tm * current_time;
+    	struct tm *current_time;
     	char clock_value[64];
+    	int maxlen, maxday, maxmon, curday, curmon;
+    	char findu[3], findl[3];
     	
-    	gettimeofday (&now, NULL);
-    	current_time = localtime(&now.tv_sec);
-    	clock_value[0] = '\0';
-    	if (dc->clock_format != NULL)
-        	strftime(clock_value, sizeof(clock_value), dc->clock_format, current_time);
-    	gtk_label_set_text (GTK_LABEL(dc->clock_label), clock_value);
         gtk_widget_show(dc->clock_label);
         gtk_widget_hide(dc->clock_icon);
-        gtk_widget_size_request (dc->clock_label, &req);
-    	newwidth += req.width + MENU_BUTTON_PAD;
+        
+    	if (dc->clock_format != NULL)
+    	{
+    		// get the current time as a starting point
+    		gettimeofday (&now, NULL);
+    		current_time = localtime (&now.tv_sec);
+        	
+    		// if clock_format contains %A, %a, %B or %b, need to loop through days (a) or months (b) to find longest...
+    		
+    		// find longest day of week
+    		sprintf (findu, "%%A");
+    		sprintf (findl, "%%a");
+    		maxday = 0;
+    		curday = current_time->tm_wday;
+    		if (strstr (dc->clock_format, findu) != NULL || strstr (dc->clock_format, findl) != NULL)
+    		{
+    			maxlen = 0;
+    			for (current_time->tm_wday = 0; current_time->tm_wday < 7; current_time->tm_wday++)
+    			{
+    				strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
+    				gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+        			gtk_widget_size_request (dc->clock_label, &req);
+    				if (req.width > maxlen) 
+    				{
+    					maxlen = req.width;
+    					maxday = current_time->tm_wday;
+    				}
+    			}
+    		}
+    	
+    		// find longest month name
+    		sprintf (findu, "%%B");
+    		sprintf (findl, "%%b");
+    		maxmon = 0;
+    		curmon = current_time->tm_mon;
+    		if (strstr (dc->clock_format, findu) != NULL || strstr (dc->clock_format, findl) != NULL)
+    		{
+    			maxlen = 0;
+    			for (current_time->tm_mon = 0; current_time->tm_mon < 12; current_time->tm_mon++)
+    			{
+    				strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
+    				gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+        			gtk_widget_size_request (dc->clock_label, &req);
+    				if (req.width > maxlen) 
+    				{
+    					maxlen = req.width;
+    					maxmon = current_time->tm_mon;
+    				}
+    			}
+    		}
+    		
+    		// get maximum length
+    		current_time->tm_wday = maxday;
+    		current_time->tm_mon = maxmon;
+     		strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
+    		gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+       		gtk_widget_size_request (dc->clock_label, &req);
+        	maxlen = req.width;
+    		newwidth = req.width + MENU_BUTTON_PAD;
+    		
+    		// restore current day and month
+    		current_time->tm_wday = curday;
+    		current_time->tm_mon = curmon;
+    		strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
+    		gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+    	}
     }
-
-    if (dc->center_text)
-    {
-        gtk_label_set_justify(GTK_LABEL(dc->clock_label), GTK_JUSTIFY_CENTER);
-    }
+	
+    if (dc->center_text == 2)
+    	gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 1.0, 0.5);
+    else if (dc->center_text == 1)
+    	gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.5, 0.5); 
     else
-    {
-        gtk_label_set_justify(GTK_LABEL(dc->clock_label), GTK_JUSTIFY_LEFT);
-    }
+    	gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.0, 0.5);
 
     /* Rerun the experiment to determine update interval and update the display. */
     g_free(dc->prev_clock_value);
@@ -461,6 +518,7 @@ static gboolean dclock_apply_configuration(gpointer user_data)
                                      panel_get_orientation(dc->panel),
                                      newwidth, panel_get_icon_size(dc->panel), 0, 0,
                                      panel_get_height(dc->panel));
+                                     
 
     /* Save configuration */
     config_group_set_string(dc->settings, "ClockFmt", dc->clock_format);
@@ -486,6 +544,9 @@ static GtkWidget *dclock_configure(LXPanel *panel, GtkWidget *p)
         //_("Bold font"), &dc->bold, CONF_TYPE_BOOL,
         _("Tooltip only"), &dc->icon_only, CONF_TYPE_BOOL,
         //_("Center text"), &dc->center_text, CONF_TYPE_BOOL,
+        _("Left align"), &dc->center_text, CONF_TYPE_RBUTTON,
+        _("Center text"), &dc->center_text, CONF_TYPE_RBUTTON,
+        _("Right align"), &dc->center_text, CONF_TYPE_RBUTTON,
         NULL);
 }
 
