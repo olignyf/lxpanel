@@ -540,7 +540,7 @@ static LaunchButton *launchbutton_for_file_info(LaunchTaskBarPlugin * lb, FmFile
     
     GtkWidget * image = _gtk_image_new_for_icon (fm_file_info_get_icon (fi), lb->icon_size - LAUNCHBAR_ICON_TRIM);   
     gtk_misc_set_padding (GTK_MISC (image), 0, 0);
-    gtk_misc_set_alignment (GTK_MISC (image), 0, 0);
+    gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.5);
     
     gtk_container_add (GTK_CONTAINER (button), image);
     gtk_widget_show_all (button);
