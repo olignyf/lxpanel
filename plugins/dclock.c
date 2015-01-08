@@ -34,7 +34,7 @@
 #define DEFAULT_CLOCK_FORMAT  "%R"
 
 #define ICON_BUTTON_YTRIM 6
-#define MENU_BUTTON_PAD	8
+#define MENU_BUTTON_PAD	6
 
 /* Private context for digital clock plugin. */
 typedef struct {
@@ -72,6 +72,84 @@ static void dclock_popup_map(GtkWidget * widget, DClockPlugin * dc)
 {
     lxpanel_plugin_adjust_popup_position(widget, dc->plugin);
 }
+
+/* calculates how long (in pixels) a widget needs to be to hold the worst-case time in the current 24 hour period */
+static int longest_time (DClockPlugin *dc)
+{
+	struct timeval now;
+	struct tm *current_time;
+	int digit, maxval, maxdig, maxmin;
+    char clock_value[64];
+    GtkRequisition req;
+    
+	// get today's date 
+    gettimeofday (&now, NULL);
+    current_time = localtime (&now.tv_sec);
+    
+    // find the longest digit
+    maxval = 0;
+    maxdig = 0;
+    for (digit = 0; digit < 10; digit++)
+    {
+    	current_time->tm_min = digit;
+    	strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
+    	gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+        gtk_widget_size_request (dc->clock_label, &req);
+        if (req.width > maxval)
+        {
+        	maxval = req.width;
+        	maxdig = digit;
+        }
+    }
+    
+    // maxdig now holds the widest digit - find the widest integer 00 - 59 for min and sec
+    
+    if (maxdig < 6) maxmin = 10 * maxdig + maxdig;
+    else
+    {
+		maxmin = 0;
+		maxval = 0;
+		for (digit = 0; digit < 6; digit++)
+		{
+			current_time->tm_min = 10 * digit + maxdig;
+    		strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
+    		gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+        	gtk_widget_size_request (dc->clock_label, &req);
+        	if (req.width > maxval)
+        	{
+        		maxval = req.width;
+        		maxmin = current_time->tm_min;
+        	}
+		}    
+    }
+    
+    // maxmin now holds the longest minute and second value - find the longest hour, incl am and pm
+    
+    current_time->tm_min = maxmin;
+    current_time->tm_sec = maxmin;
+    maxval = 0;
+	for (digit = 0; digit < 23; digit++)
+	{
+		current_time->tm_hour = digit;
+    	strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
+    	gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+        gtk_widget_size_request (dc->clock_label, &req);
+        if (req.width > maxval)
+        {
+        	maxval = req.width;
+        }
+	}   
+	
+	// maxval is now width in pixels of longest time today...
+	
+	// put the clock back to where it should be
+    gettimeofday (&now, NULL);
+    current_time = localtime (&now.tv_sec);
+    strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
+    gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+
+	return maxval;
+} 
 
 /* Display a window containing the standard calendar widget. */
 static GtkWidget * dclock_create_calendar(DClockPlugin * dc)
@@ -157,6 +235,21 @@ static void dclock_timer_set(DClockPlugin * dc, struct timeval *current_time)
     dc->timer = g_timeout_add(milliseconds, (GSourceFunc) dclock_update_display, (gpointer) dc);
 }
 
+/* Compare length and content of two strings to see how much they have in common */
+static int strdiff (char *str1, char *str2)
+{
+	int index, diffs = 0;
+	int l1 = strlen (str1);
+	int l2 = strlen (str2);
+	
+	if (l1 != l2) return 1;
+	for (index = 0; index < l1; index++)
+		if (str1[index] != str2[index]) diffs++;
+		
+	if (diffs > 3) return 1;
+	return 0;	
+}
+
 /* Periodic timer callback.
  * Also used during initialization and configuration change to do a redraw. */
 static gboolean dclock_update_display(DClockPlugin * dc)
@@ -180,13 +273,21 @@ static gboolean dclock_update_display(DClockPlugin * dc)
     tooltip_value[0] = '\0';
     if (dc->tooltip_format != NULL)
         strftime(tooltip_value, sizeof(tooltip_value), dc->tooltip_format, current_time);
-
+        
     /* When we write the clock value, it causes the panel to do a full relayout.
      * Since this function may be called too often while the timing experiment is underway,
      * we take the trouble to check if the string actually changed first. */
     if (( ! dc->icon_only)
     && ((dc->prev_clock_value == NULL) || (strcmp(dc->prev_clock_value, clock_value) != 0)))
     {
+    	// update the text widget length if the contents have changed significantly....
+    	if (dc->prev_clock_value == NULL || strdiff (clock_value, dc->prev_clock_value))
+    	{
+    		int newwidth = longest_time (dc) + MENU_BUTTON_PAD;	
+    		panel_icon_grid_set_geometry (dc->grid, panel_get_orientation (dc->panel), newwidth, 
+    			panel_get_icon_size (dc->panel), 0, 0, panel_get_height (dc->panel));
+		}
+
         /* Convert "\n" escapes in the user's format string to newline characters. */
         char * newlines_converted = NULL;
         if (strstr(clock_value, "\\n") != NULL)
@@ -426,6 +527,7 @@ static gboolean dclock_apply_configuration(gpointer user_data)
         
     	if (dc->clock_format != NULL)
     	{
+#if 0    	
     		// get the current time as a starting point
     		gettimeofday (&now, NULL);
     		current_time = localtime (&now.tv_sec);
@@ -481,15 +583,13 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     		gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
        		gtk_widget_size_request (dc->clock_label, &req);
         	maxlen = req.width;
-    		newwidth = req.width + MENU_BUTTON_PAD;
-    		
-    		// restore current day and month
-    		current_time->tm_wday = curday;
-    		current_time->tm_mon = curmon;
-    		strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
-    		gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+#endif
+    		newwidth = longest_time (dc) + MENU_BUTTON_PAD;
     	}
     }
+    
+    panel_icon_grid_set_geometry(dc->grid, panel_get_orientation(dc->panel), newwidth, 
+    	panel_get_icon_size(dc->panel), 0, 0, panel_get_height(dc->panel));
 	
     if (dc->center_text == 2)
     	gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 1.0, 0.5);
@@ -514,10 +614,6 @@ static gboolean dclock_apply_configuration(gpointer user_data)
         dc->calendar_window = NULL;
     }
     
-    panel_icon_grid_set_geometry(dc->grid,
-                                     panel_get_orientation(dc->panel),
-                                     newwidth, panel_get_icon_size(dc->panel), 0, 0,
-                                     panel_get_height(dc->panel));
                                      
 
     /* Save configuration */
