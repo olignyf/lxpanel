@@ -2849,11 +2849,6 @@ static void task_build_gui(LaunchTaskBarPlugin * tb, Task * tk)
     tk->label = gtk_label_new(NULL);
     gtk_misc_set_alignment(GTK_MISC(tk->label), 0.0, 0.5);
     gtk_label_set_ellipsize(GTK_LABEL(tk->label), PANGO_ELLIPSIZE_END);
-    
-    /* set the text colour on mouse over */
-	gtk_widget_realize (tb->menu);
-	GdkColor colorf = gtk_widget_get_style(tb->menu)->fg[GTK_STATE_SELECTED];
-    gtk_widget_modify_fg (tk->label, GTK_STATE_PRELIGHT, &colorf);
     gtk_box_pack_start(GTK_BOX(container), tk->label, TRUE, TRUE, 0);
 
     /* Add the box to the button. */

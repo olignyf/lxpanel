@@ -768,11 +768,6 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     {
     	m->label = gtk_label_new(title);
     	gtk_misc_set_alignment(GTK_MISC(m->label), 0.5, 0.5);
-  	
-    	/* set the text colour on mouse-over */
-  		gtk_widget_realize (menu);
-		GdkColor colorf = gtk_widget_get_style(menu)->fg[GTK_STATE_SELECTED];
-    	gtk_widget_modify_fg (m->label, GTK_STATE_PRELIGHT, &colorf);
     	gtk_box_pack_start(GTK_BOX(container), m->label, TRUE, TRUE, 0);
     }
     	
@@ -1129,12 +1124,8 @@ static gboolean apply_config(GtkWidget *p)
     	{
     		m->label = gtk_label_new (m->caption);
     		gtk_misc_set_alignment (GTK_MISC(m->label), 0.5, 0.5);
-    		gtk_widget_show (m->label);
-  	
-    		/* set the text colour on mouse-over */
-			GdkColor colorf = gtk_widget_get_style(m->menu)->fg[GTK_STATE_SELECTED];
-    		gtk_widget_modify_fg (m->label, GTK_STATE_PRELIGHT, &colorf);
     		gtk_box_pack_start(GTK_BOX(child), m->label, TRUE, TRUE, 0);
+    		gtk_widget_show (m->label);
     	}
     	else gtk_label_set_text (GTK_LABEL(m->label), m->caption);
     }
