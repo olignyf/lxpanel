@@ -471,19 +471,43 @@ static void process_client_msg ( XClientMessageEvent* ev )
             	if (p != NULL)
             	{
             		// at some point I may need to read some more parameters here, but this will do for now...
-					char linebuf[256];
+					char linebuf[256], posbuf[16];
 					int val;
 					FILE *fp = fopen (_user_config_file_name ("panels", p->priv->name), "rb");
 					while (!feof (fp))
 					{
 						if (fgets (linebuf, 256, fp))
-							if (sscanf (linebuf, "  iconsize=%d", &val) == 1)
+						{
+							if (sscanf (linebuf, "%*[ \t]iconsize=%d", &val) == 1)
 							{
-								p->priv->icon_size = val;
-								p->priv->height = val;
+								if (p->priv->icon_size != val || p->priv->height != val)
+								{
+									p->priv->icon_size = val;
+									p->priv->height = val;										
+									panel_set_panel_configuration_changed (p->priv);
+								}
 							}
+							if (sscanf (linebuf, "%*[ \t]edge=%s", posbuf) == 1)
+							{
+								if (!strcmp (posbuf, "bottom")) 
+								{
+									if (p->priv->edge != EDGE_BOTTOM) 
+									{
+										p->priv->edge = EDGE_BOTTOM;
+										update_panel_geometry (p);
+									}
+								}
+								else 
+								{
+									if (p->priv->edge != EDGE_TOP)
+									{
+										p->priv->edge = EDGE_TOP;
+										update_panel_geometry (p);
+									}
+								}
+							}
+						}
 					}
-					panel_set_panel_configuration_changed(p->priv);
             	}
             }
             break;

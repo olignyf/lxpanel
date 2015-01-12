@@ -111,7 +111,7 @@ response_event(GtkDialog *widget, gint arg1, Panel* panel )
     return;
 }
 
-static void
+void
 update_panel_geometry( LXPanel* p )
 {
     /* Guard against being called early in panel creation. */
