@@ -480,12 +480,9 @@ static void process_client_msg ( XClientMessageEvent* ev )
 						{
 							if (sscanf (linebuf, "%*[ \t]iconsize=%d", &val) == 1)
 							{
-								if (p->priv->icon_size != val || p->priv->height != val)
-								{
-									p->priv->icon_size = val;
-									p->priv->height = val;										
-									panel_set_panel_configuration_changed (p->priv);
-								}
+								p->priv->icon_size = val;
+								p->priv->height = val;										
+								panel_set_panel_configuration_changed (p->priv);
 							}
 							if (sscanf (linebuf, "%*[ \t]edge=%s", posbuf) == 1)
 							{
