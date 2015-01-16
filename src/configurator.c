@@ -1335,7 +1335,7 @@ static void on_radio_changed( GtkRadioButton* btn, gpointer user_data )
     {
     	tbtn = group->data;
     	group = group->next;
-    	if (gtk_toggle_button_get_active(tbtn)) sbtn = nbtn;
+    	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tbtn))) sbtn = nbtn;
     	nbtn++;
     }
     *val = nbtn - sbtn - 1;
@@ -1346,6 +1346,12 @@ static void on_file_chooser_btn_file_set(GtkFileChooser* btn, char** val)
 {
     g_free( *val );
     *val = gtk_file_chooser_get_filename(btn);
+    notify_apply_config( GTK_WIDGET(btn) );
+}
+
+static void on_color_button_set(GtkColorButton* btn, char** val)
+{
+    gtk_color_button_get_color (btn, (GdkColor *) val);
     notify_apply_config( GTK_WIDGET(btn) );
 }
 
@@ -1490,21 +1496,28 @@ static GtkWidget *_lxpanel_generic_config_dlg(const char *title, Panel *p,
                 g_free (markup);
                 }
                 break;
+            case CONF_TYPE_COLOR:
+                {
+                entry = gtk_color_button_new();
+				gtk_color_button_set_color (GTK_COLOR_BUTTON (entry), val);
+				g_signal_connect (entry, "color-set", G_CALLBACK (on_color_button_set), val);
+                }
+                break;
             case CONF_TYPE_RBUTTON:
             	if (!rb_group)
             	{
             		entry = gtk_radio_button_new_with_label (NULL, name);
                 	g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
-                	gtk_toggle_button_set_active (entry, * (int *) val == rb_group);
-            		gtk_radio_button_group (entry);
+                	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (entry), * (int *) val == rb_group);
+            		gtk_radio_button_group (GTK_RADIO_BUTTON (entry));
             		lastbtn = entry;
             		rb_group++;
             	}
             	else 
             	{
-            		entry = gtk_radio_button_new_with_label (gtk_radio_button_group (lastbtn), name); 
+            		entry = gtk_radio_button_new_with_label (gtk_radio_button_group (GTK_RADIO_BUTTON (lastbtn)), name); 
                 	g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
-                	gtk_toggle_button_set_active (entry, * (int *) val == rb_group);
+                	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (entry), * (int *) val == rb_group);
             		lastbtn = entry;
             		rb_group++;
             	}
