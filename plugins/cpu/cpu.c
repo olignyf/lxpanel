@@ -260,10 +260,23 @@ static GtkWidget *cpu_constructor(LXPanel *panel, config_setting_t *settings)
     CPUPlugin * c = g_new0(CPUPlugin, 1);
     GtkWidget * p;
     int tmp_int;
+    const char *str;
 
 	c->settings = settings;
     if (config_setting_lookup_int(settings, "ShowPercent", &tmp_int))
         c->show_percentage = tmp_int != 0;
+        
+    if (config_setting_lookup_string(settings, "Foreground", &str))
+    {
+    	if (!gdk_color_parse (str, &c->foreground_color))
+    		gdk_color_parse("dark gray",  &c->foreground_color);
+    } else gdk_color_parse("dark gray",  &c->foreground_color);
+
+    if (config_setting_lookup_string(settings, "Background", &str))
+    {
+    	if (!gdk_color_parse (str, &c->background_color))
+    		gdk_color_parse("light gray",  &c->background_color);
+    } else gdk_color_parse("light gray",  &c->background_color);
 
     /* Allocate top level widget and set into Plugin widget pointer. */
     p = gtk_event_box_new();
@@ -279,9 +292,7 @@ static GtkWidget *cpu_constructor(LXPanel *panel, config_setting_t *settings)
 
     /* Clone a graphics context and set "green" as its foreground color.
      * We will use this to draw the graph. */
-    gdk_color_parse("dark gray",  &c->foreground_color);
-    gdk_color_parse("light gray",  &c->background_color);
-
+    
     /* Connect signals. */
     g_signal_connect(G_OBJECT(c->da), "configure-event", G_CALLBACK(configure_event), (gpointer) c);
     g_signal_connect(G_OBJECT(c->da), "expose-event", G_CALLBACK(expose_event), (gpointer) c);
@@ -308,9 +319,14 @@ static void cpu_destructor(gpointer user_data)
 
 static gboolean cpu_apply_configuration (gpointer user_data)
 {
+	char colbuf[32];
     GtkWidget * p = user_data;
     CPUPlugin * c = lxpanel_plugin_get_data(p);
-    config_group_set_int(c->settings, "ShowPercent", c->show_percentage);
+    config_group_set_int (c->settings, "ShowPercent", c->show_percentage);
+    sprintf (colbuf, "%s", gdk_color_to_string (&c->foreground_color));
+    config_group_set_string (c->settings, "Foreground", colbuf);
+    sprintf (colbuf, "%s", gdk_color_to_string (&c->background_color));
+    config_group_set_string (c->settings, "Background", colbuf);
 }
 
 /* Callback when the configuration dialog is to be shown. */
@@ -320,6 +336,8 @@ static GtkWidget *cpu_configure(LXPanel *panel, GtkWidget *p)
     return lxpanel_generic_config_dlg(_("CPU Usage"), panel,
         cpu_apply_configuration, p,
         _("Show usage as percentage"), &dc->show_percentage, CONF_TYPE_BOOL,
+        _("Foreground colour"), &dc->foreground_color, CONF_TYPE_COLOR,
+        _("Background colour"), &dc->background_color, CONF_TYPE_COLOR,
         NULL);
 }
 
