@@ -38,6 +38,7 @@
 #include "misc.h"
 #include "plugin.h"
 #include "menu-policy.h"
+#include "icon-grid.h"
 
 #include "dbg.h"
 
@@ -81,12 +82,13 @@ static guint idle_loader = 0;
 
 GQuark SYS_MENU_ITEM_ID = 0;
 
-#define ICON_BUTTON_YTRIM 6
-#define MENU_BUTTON_PAD	6
+#define ICON_BUTTON_TRIM 4
+#define MENU_TEXT_PAD 	8
 
 /* FIXME: this is defined in misc.c and should be replaced later */
 GtkWidget *_gtk_image_new_from_file_scaled(const gchar *file, gint width,
                                            gint height, gboolean keep_ratio);
+
 /* FIXME: those are defined on panel main code */
 void restart(void);
 void gtk_run(void);
@@ -441,7 +443,7 @@ static GtkWidget* create_item(MenuCacheItem *item, menup *m)
         //!!!!SPL char *mpath = menu_cache_dir_make_path(MENU_CACHE_DIR(item));
         //!!!!SPL FmPath *path = fm_path_new_relative(fm_path_get_apps_menu(), mpath+13);
                                                     /* skip "/Applications" */
-		char *mpath =  menu_cache_item_get_file_path(MENU_CACHE_DIR(item));
+		char *mpath =  menu_cache_item_get_file_path(MENU_CACHE_ITEM(item));
         FmPath *path = fm_path_new_for_path (mpath);
         FmFileInfo *fi = fm_file_info_new_from_menu_cache_item(path, item);
 
@@ -725,6 +727,9 @@ static GtkWidget *
 make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, GtkWidget *menu)
 {
     char* title = NULL;
+    int spacing = 0;
+    GtkRequisition req;
+    
     ENTER;
     gtk_rc_parse_string ("style 'button-style'\n{\nGtkWidget::focus-padding=0\nGtkWidget::focus-line-width=0\nGtkWidget::focus-padding=0\nGtkButton::default-border={0,0,0,0}\nGtkButton::default-outside-border={0,0,0,0}\nGtkButton::inner-border={0,0,0,0}\n}\nwidget '*' style 'button-style'");    
     m->menu = menu;
@@ -738,12 +743,21 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     gtk_misc_set_alignment (GTK_MISC (container), 0.5, 0.5);
 
     /* Create an image to contain the application icon and add it to the box. */
-    GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_YTRIM, TRUE, NULL);
-    m->icon = gtk_image_new_from_pixbuf(pixbuf);
-    gtk_misc_set_padding(GTK_MISC(m->icon), 0, 0);
-    gtk_misc_set_alignment (GTK_MISC (m->icon), 0.5, 0.5);
-    g_object_unref(pixbuf);
-    gtk_box_pack_start(GTK_BOX(container), m->icon, FALSE, FALSE, 0);
+    if (fname)
+    {
+    	GdkPixbuf *pixbuf = gdk_pixbuf_new_from_file_at_scale(fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
+    	if (pixbuf == NULL)
+    	{
+			m->fname = g_strdup(DEFAULT_MENU_ICON);
+			pixbuf = gdk_pixbuf_new_from_file_at_scale(m->fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
+    	}
+    	m->icon = gtk_image_new_from_pixbuf(pixbuf);
+    	gtk_misc_set_padding(GTK_MISC(m->icon), 0, 0);
+    	gtk_misc_set_alignment (GTK_MISC (m->icon), 0.5, 0.5);
+    	spacing = panel_get_icon_size (m->panel);
+    	g_object_unref(pixbuf);
+    	gtk_box_pack_start(GTK_BOX(container), m->icon, FALSE, FALSE, 0);
+    }
     
     if( name )
     {
@@ -768,7 +782,10 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     {
     	m->label = gtk_label_new(title);
     	gtk_misc_set_alignment(GTK_MISC(m->label), 0.5, 0.5);
+    	gtk_misc_set_padding(GTK_MISC(m->label), 0, 0);
     	gtk_box_pack_start(GTK_BOX(container), m->label, TRUE, TRUE, 0);
+    	gtk_widget_size_request (GTK_WIDGET (m->label), &req);
+    	spacing += req.width + MENU_TEXT_PAD;
     }
     	
     if (title != name) g_free (title);
@@ -779,12 +796,7 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
   	
     gtk_widget_show_all(m->btn);
     
-    int spacing = 0;
-    if (m->label && fname) spacing = 2;
-
-	GtkRequisition req;
-    gtk_widget_size_request (container, &req);
-    panel_icon_grid_set_geometry(m->grid, panel_get_orientation(m->panel), req.width + MENU_BUTTON_PAD + spacing, 
+    panel_icon_grid_set_geometry(PANEL_ICON_GRID(m->grid), panel_get_orientation(m->panel), spacing, 
     	panel_get_icon_size(m->panel), 0, 0, panel_get_height(m->panel));
 
     gtk_container_add(GTK_CONTAINER(m->grid), m->btn);
@@ -901,7 +913,7 @@ read_system_menu(GtkMenu *menu, menup *m, config_setting_t *s)
             return;
         }
         m->visibility_flags = flags;
-        m->reload_notify = menu_cache_add_reload_notify(m->menu_cache, on_reload_menu, m);
+        m->reload_notify = menu_cache_add_reload_notify(m->menu_cache, (GFunc) on_reload_menu, m);
         sys_menu_insert_items( m, menu, -1 );
     }
 
@@ -1108,12 +1120,24 @@ static gboolean apply_config(GtkWidget *p)
 	GdkPixbuf *pixbuf = NULL;
 	GtkWidget *child = gtk_bin_get_child(GTK_BIN(m->btn));
 
+	// check for no name or icon
+	if (!m->fname && !m->caption) m->fname = g_strdup(DEFAULT_MENU_ICON);
+
 	// set the icon
+    spacing = 0;
     if (m->fname) 
     {
-		pixbuf = gdk_pixbuf_new_from_file_at_scale(m->fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_YTRIM, TRUE, NULL);
+		pixbuf = gdk_pixbuf_new_from_file_at_scale(m->fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
+		if (pixbuf == NULL)
+		{
+			m->fname = g_strdup(DEFAULT_MENU_ICON);
+			pixbuf = gdk_pixbuf_new_from_file_at_scale(m->fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
+		}
     	gtk_image_set_from_pixbuf (GTK_IMAGE(m->icon), pixbuf);
+    	gtk_misc_set_padding (GTK_MISC (m->icon), 0, 0);
+    	gtk_misc_set_alignment (GTK_MISC (m->icon), 0.5, 0.5);
     	g_object_unref(pixbuf);
+    	spacing += panel_get_icon_size(m->panel);
     }
     else gtk_image_set_from_pixbuf (GTK_IMAGE(m->icon), NULL);
     
@@ -1128,18 +1152,17 @@ static gboolean apply_config(GtkWidget *p)
     		gtk_widget_show (m->label);
     	}
     	else gtk_label_set_text (GTK_LABEL(m->label), m->caption);
+    	gtk_widget_size_request (m->label, &req);
+    	spacing += req.width + MENU_TEXT_PAD;
     }
     else if (m->label)
     {
 		gtk_container_remove (GTK_CONTAINER (child), m->label);
-		m->label = NULL;	
+		m->label = NULL;
 	}   
 	 
     // resize the box
-    if (m->fname && m->caption) spacing = 2;
-    else spacing = 0;
-    gtk_widget_size_request (child, &req);
-    panel_icon_grid_set_geometry(m->grid, panel_get_orientation(m->panel), req.width + MENU_BUTTON_PAD + spacing, 
+    panel_icon_grid_set_geometry(PANEL_ICON_GRID(m->grid), panel_get_orientation(m->panel), spacing, 
     	panel_get_icon_size(m->panel), 0, 0, panel_get_height(m->panel));
 
     config_group_set_string(m->settings, "image", m->fname);
@@ -1160,7 +1183,7 @@ static gboolean apply_config(GtkWidget *p)
 static GtkWidget *menu_config(LXPanel *panel, GtkWidget *p)
 {
     menup* menu = lxpanel_plugin_get_data(p);
-    return lxpanel_generic_config_dlg(_("Menu"), panel, apply_config, p,
+    return lxpanel_generic_config_dlg(_("Menu"), panel, (GSourceFunc) apply_config, p,
                                       _("Icon"), &menu->fname, CONF_TYPE_FILE_ENTRY,
                                       _("Caption"), &menu->caption, CONF_TYPE_STR,
                                       NULL);
