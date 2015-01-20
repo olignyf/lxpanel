@@ -1051,7 +1051,7 @@ menu_constructor(LXPanel *panel, config_setting_t *settings)
     //m->iconsize = MAX(iw, ih);
     iw = panel_get_icon_size (panel);
     if (iw <= 12) iw = 8;
-    else if (iw <= 19) iw = 16;
+    else if (iw <= 20) iw = 16;
     else if (iw <= 23) iw = 22;
     else if (iw <= 28) iw = 24;
     else if (iw <= 40) iw = 32;
@@ -1109,7 +1109,7 @@ static gboolean apply_config(GtkWidget *p)
     /* update the local icon size parameter */
     int iw = panel_get_icon_size(m->panel);
     if (iw <= 12) iw = 8;
-    else if (iw <= 19) iw = 16;
+    else if (iw <= 20) iw = 16;
     else if (iw <= 23) iw = 22;
     else if (iw <= 28) iw = 24;
     else if (iw <= 40) iw = 32;
