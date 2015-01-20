@@ -29,12 +29,13 @@
 #include <glib/gi18n.h>
 
 #include "dbg.h"
+#include "icon-grid.h"
 
 #define DEFAULT_TIP_FORMAT    "%A %x"
 #define DEFAULT_CLOCK_FORMAT  "%R"
 
-#define ICON_BUTTON_YTRIM 6
-#define MENU_BUTTON_PAD	6
+#define ICON_BUTTON_TRIM 4
+#define CLOCK_TEXT_PAD	6
 
 /* Private context for digital clock plugin. */
 typedef struct {
@@ -283,8 +284,7 @@ static gboolean dclock_update_display(DClockPlugin * dc)
     	// update the text widget length if the contents have changed significantly....
     	if (dc->prev_clock_value == NULL || strdiff (clock_value, dc->prev_clock_value))
     	{
-    		int newwidth = longest_time (dc) + MENU_BUTTON_PAD;	
-    		panel_icon_grid_set_geometry (dc->grid, panel_get_orientation (dc->panel), newwidth, 
+    		panel_icon_grid_set_geometry (PANEL_ICON_GRID(dc->grid), panel_get_orientation (dc->panel), longest_time (dc) + CLOCK_TEXT_PAD, 
     			panel_get_icon_size (dc->panel), 0, 0, panel_get_height (dc->panel));
 		}
 
@@ -497,7 +497,8 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     /* Set up the icon or the label as the displayable widget. */
     if (dc->icon_only)
     {
-		GdkPixbuf * pixbuf = gdk_pixbuf_new_from_file_at_scale(PACKAGE_DATA_DIR "/images/clock.png", panel_get_icon_size(dc->panel) - ICON_BUTTON_YTRIM, panel_get_icon_size(dc->panel) - ICON_BUTTON_YTRIM, TRUE, NULL);
+		GdkPixbuf * pixbuf = gdk_pixbuf_new_from_file_at_scale(PACKAGE_DATA_DIR "/images/clock.png", 
+			panel_get_icon_size(dc->panel) - ICON_BUTTON_TRIM, panel_get_icon_size(dc->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
     	if (pixbuf != NULL)
     	{
         	gtk_image_set_from_pixbuf(GTK_IMAGE(dc->clock_icon), pixbuf);
@@ -505,8 +506,7 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     	}
         gtk_widget_show(dc->clock_icon);
         gtk_widget_hide(dc->clock_label);
-        gtk_widget_size_request (dc->clock_icon, &req);
-    	newwidth = req.width + ICON_BUTTON_YTRIM;
+    	newwidth = panel_get_icon_size(dc->panel);
     }
     else
     {
@@ -579,11 +579,11 @@ static gboolean dclock_apply_configuration(gpointer user_data)
        		gtk_widget_size_request (dc->clock_label, &req);
         	maxlen = req.width;
 #endif
-    		newwidth = longest_time (dc) + MENU_BUTTON_PAD;
+    		newwidth = longest_time (dc) + CLOCK_TEXT_PAD;
     	}
     }
     
-    panel_icon_grid_set_geometry(dc->grid, panel_get_orientation(dc->panel), newwidth, 
+    panel_icon_grid_set_geometry(PANEL_ICON_GRID(dc->grid), panel_get_orientation(dc->panel), newwidth, 
     	panel_get_icon_size(dc->panel), 0, 0, panel_get_height(dc->panel));
 	
     if (dc->center_text == 2)
