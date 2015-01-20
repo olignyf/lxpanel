@@ -66,7 +66,6 @@
 
 #define PANEL_ICON_SIZE 24 /* see the private.h */
 
-#define LAUNCHBAR_ICON_TRIM 6
 /* Column definitions for configuration dialogs. */
 enum {
     COL_ICON,
@@ -206,8 +205,10 @@ static gchar *launchtaskbar_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
 #define DRAG_ACTIVE_DELAY    1000
 #define TASK_WIDTH_MAX       200
 #define ALL_WORKSPACES       -1
-#define ICON_ONLY_EXTRA      6      /* Amount needed to have button lay out symmetrically */
-#define ICON_BUTTON_TRIM 4      /* Amount needed to have button remain on panel */
+
+#define ICON_BUTTON_TRIM 	 4      /* Amount needed to have button remain on panel */
+
+extern GtkWidget *_gtk_image_new_for_icon(FmIcon *icon, gint size);
 
 static void launchtaskbar_destructor(gpointer user_data);
 
@@ -424,11 +425,11 @@ static void launchbutton_build_bootstrap(LaunchTaskBarPlugin *lb)
 
         /* Create an image containing the stock "Add" icon as a child of the event box. */
         lb->add_icon = fm_icon_from_name(GTK_STOCK_ADD);
-        icon = fm_pixbuf_from_icon(lb->add_icon, lb->icon_size - LAUNCHBAR_ICON_TRIM);
+        icon = fm_pixbuf_from_icon(lb->add_icon, lb->icon_size - ICON_BUTTON_TRIM);
         lb->bootstrap_button->image_widget = gtk_image_new_from_pixbuf(icon);
         g_object_unref(icon);
         gtk_misc_set_padding(GTK_MISC(lb->bootstrap_button->image_widget), 0, 0);
-        gtk_misc_set_alignment(GTK_MISC(lb->bootstrap_button->image_widget), 0, 0);
+        gtk_misc_set_alignment(GTK_MISC(lb->bootstrap_button->image_widget), 0.5, 0.5);
         gtk_container_add(GTK_CONTAINER(event_box), lb->bootstrap_button->image_widget);
 
         /* Add the bootstrap button to the icon grid.  By policy it is empty at this point. */
@@ -538,7 +539,7 @@ static LaunchButton *launchbutton_for_file_info(LaunchTaskBarPlugin * lb, FmFile
     gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
     GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
     
-    GtkWidget * image = _gtk_image_new_for_icon (fm_file_info_get_icon (fi), lb->icon_size - LAUNCHBAR_ICON_TRIM);   
+    GtkWidget * image = _gtk_image_new_for_icon (fm_file_info_get_icon (fi), lb->icon_size - ICON_BUTTON_TRIM);
     gtk_misc_set_padding (GTK_MISC (image), 0, 0);
     gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.5);
     
@@ -1519,6 +1520,8 @@ static void launchtaskbar_panel_configuration_changed(LXPanel *panel, GtkWidget 
             if (pixbuf != NULL)
             {
                 gtk_image_set_from_pixbuf(GTK_IMAGE(tk->image), pixbuf);
+                gtk_misc_set_alignment (GTK_MISC(tk->image), 0.5, 0.5);
+                gtk_misc_set_padding (GTK_MISC(tk->image), 0, 0);
                 g_object_unref(pixbuf);
             }
         }
@@ -1526,9 +1529,8 @@ static void launchtaskbar_panel_configuration_changed(LXPanel *panel, GtkWidget 
         {
             LaunchButton * btn = (LaunchButton *) l->data;
             lxpanel_button_update_icon(btn->widget, fm_file_info_get_icon(btn->fi),
-                                       new_icon_size - LAUNCHBAR_ICON_TRIM);
+                                       new_icon_size - ICON_BUTTON_TRIM);
         }
-
     }
 
     /* Redraw all the labels.  Icon size or font color may have changed. */
@@ -2760,7 +2762,7 @@ static void taskbar_update_style(LaunchTaskBarPlugin * tb)
 {
     panel_icon_grid_set_geometry(PANEL_ICON_GRID(tb->tb_icon_grid),
         panel_get_orientation(tb->panel),
-        ((tb->icons_only) ? tb->icon_size + ICON_ONLY_EXTRA : tb->task_width_max),
+        ((tb->icons_only) ? panel_get_icon_size (tb->panel) : tb->task_width_max),
         panel_get_icon_size (tb->panel), tb->spacing, 0, panel_get_height(tb->panel));
 }
 
@@ -2841,6 +2843,7 @@ static void task_build_gui(LaunchTaskBarPlugin * tb, Task * tk)
     GdkPixbuf* pixbuf = task_update_icon(tb, tk, None);
     tk->image = gtk_image_new_from_pixbuf(pixbuf);
     gtk_misc_set_padding(GTK_MISC(tk->image), 0, 0);
+    gtk_misc_set_alignment(GTK_MISC(tk->image), 0.5, 0.5);
     g_object_unref(pixbuf);
     gtk_widget_show(tk->image);
     gtk_box_pack_start(GTK_BOX(container), tk->image, FALSE, FALSE, 0);
@@ -2854,6 +2857,7 @@ static void task_build_gui(LaunchTaskBarPlugin * tb, Task * tk)
     /* Add the box to the button. */
     gtk_container_add(GTK_CONTAINER(tk->button), container);
     gtk_container_set_border_width(GTK_CONTAINER(tk->button), 0);
+    gtk_misc_set_alignment (GTK_MISC (tk->button), 0.5, 0.5);
 
     /* Add the button to the taskbar. */
     gtk_container_add(GTK_CONTAINER(tb->tb_icon_grid), tk->button);
@@ -3527,7 +3531,7 @@ static LXPanelPluginInit _taskbar_init = {
     .expand_default = TRUE,
 
     .new_instance = taskbar_constructor,
-//    .config = launchtaskbar_configure,
+    .config = launchtaskbar_configure,
     .reconfigure = launchtaskbar_panel_configuration_changed
 };
 
