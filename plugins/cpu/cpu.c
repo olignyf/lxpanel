@@ -290,9 +290,6 @@ static GtkWidget *cpu_constructor(LXPanel *panel, config_setting_t *settings)
     gtk_widget_add_events(c->da, GDK_BUTTON_PRESS_MASK);
     gtk_container_add(GTK_CONTAINER(p), c->da);
 
-    /* Clone a graphics context and set "green" as its foreground color.
-     * We will use this to draw the graph. */
-    
     /* Connect signals. */
     g_signal_connect(G_OBJECT(c->da), "configure-event", G_CALLBACK(configure_event), (gpointer) c);
     g_signal_connect(G_OBJECT(c->da), "expose-event", G_CALLBACK(expose_event), (gpointer) c);
