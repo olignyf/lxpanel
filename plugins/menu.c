@@ -731,7 +731,6 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     GtkRequisition req;
     
     ENTER;
-    gtk_rc_parse_string ("style 'button-style'\n{\nGtkWidget::focus-padding=0\nGtkWidget::focus-line-width=0\nGtkWidget::focus-padding=0\nGtkButton::default-border={0,0,0,0}\nGtkButton::default-outside-border={0,0,0,0}\nGtkButton::inner-border={0,0,0,0}\n}\nwidget '*' style 'button-style'");    
     m->menu = menu;
     m->btn = gtk_button_new();
     gtk_container_set_border_width(GTK_CONTAINER(m->btn), 0);
