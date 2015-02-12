@@ -274,7 +274,7 @@ static gboolean dclock_update_display(DClockPlugin * dc)
     tooltip_value[0] = '\0';
     if (dc->tooltip_format != NULL)
         strftime(tooltip_value, sizeof(tooltip_value), dc->tooltip_format, current_time);
-        
+
     /* When we write the clock value, it causes the panel to do a full relayout.
      * Since this function may be called too often while the timing experiment is underway,
      * we take the trouble to check if the string actually changed first. */
@@ -396,8 +396,6 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     const char *str;
     int tmp_int;
 
-    gtk_rc_parse_string ("style 'button-style'\n{\nGtkWidget::focus-padding=0\nGtkWidget::focus-line-width=0\nGtkWidget::focus-padding=0\nGtkButton::default-border={0,0,0,0}\nGtkButton::default-outside-border={0,0,0,0}\nGtkButton::inner-border={0,0,0,0}\n}\nwidget '*' style 'button-style'");    
-
     /* Load parameters from the configuration file. */
     if (config_setting_lookup_string(settings, "ClockFmt", &str))
         dc->clock_format = g_strdup(str);
@@ -443,7 +441,6 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
      * Only one of these is visible at a time, controlled by user preference. */
     dc->clock_label = gtk_label_new(NULL);  
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_label);
-    
     dc->clock_icon = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_icon);
 
@@ -608,8 +605,6 @@ static gboolean dclock_apply_configuration(gpointer user_data)
         gtk_widget_destroy(dc->calendar_window);
         dc->calendar_window = NULL;
     }
-    
-                                     
 
     /* Save configuration */
     config_group_set_string(dc->settings, "ClockFmt", dc->clock_format);
