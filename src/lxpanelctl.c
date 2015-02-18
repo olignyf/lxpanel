@@ -37,6 +37,7 @@ static const char usage[] =
         "config\tshow configuration dialog\n"
         "restart\trestart lxpanel\n"
         "refresh\trefresh lxpanel\n"
+        "alsaconf\tupdate ALSA volume plugin\n"
         "exit\texit lxpanel\n\n";
 
 static int get_cmd( const char* cmd )
@@ -53,6 +54,8 @@ static int get_cmd( const char* cmd )
         return LXPANEL_CMD_EXIT;
     else if( ! strcmp( cmd, "refresh") )
         return LXPANEL_CMD_REFRESH;
+    else if( ! strcmp( cmd, "alsaconf") )
+        return LXPANEL_CMD_ALSACONF;
     return -1;
 }
 
