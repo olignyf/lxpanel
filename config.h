@@ -14,7 +14,7 @@
 #define GETTEXT_PACKAGE "lxpanel"
 
 /* Define to 1 if you have the <alsa/asoundlib.h> header file. */
-/* #undef HAVE_ALSA_ASOUNDLIB_H */
+#define HAVE_ALSA_ASOUNDLIB_H 1
 
 /* Define to 1 if you have the `bind_textdomain_codeset' function. */
 #define HAVE_BIND_TEXTDOMAIN_CODESET 1
