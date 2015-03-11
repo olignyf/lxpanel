@@ -2548,8 +2548,8 @@ test "$program_suffix" != NONE &&
 ac_script='s/[\\$]/&&/g;s/;s,x,x,$//'
 program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 
-# expand $ac_aux_dir to an absolute path
-am_aux_dir=`cd $ac_aux_dir && pwd`
+# Expand $ac_aux_dir to an absolute path.
+am_aux_dir=`cd "$ac_aux_dir" && pwd`
 
 if test x"${MISSING+set}" != xset; then
   case $am_aux_dir in
@@ -12413,7 +12413,6 @@ if test "x$enable_gtk3" = "xyes" ; then
   pkg_modules="$pkg_modules gtk+-3.0 libfm-gtk3 >= 1.2.0 libwnck-3.0"
 else
   pkg_modules="$pkg_modules gtk+-2.0 >= 2.18.0 libfm-gtk >= 1.2.0 libwnck-1.0"
-  #pkg_modules="$pkg_modules gtk+-2.0 >= 2.18.0 libwnck-1.0"
 fi
 
 pkg_modules="$pkg_modules \
@@ -13153,6 +13152,7 @@ plugin_thermal=
 plugin_cpufreq=
 plugin_monitors=
 plugin_indicator=
+plugin_dhcpcdui=
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking which plugins should be built dynamically" >&5
 $as_echo_n "checking which plugins should be built dynamically... " >&6; }
@@ -13171,7 +13171,7 @@ if test x"$plugins" != xall -a x"$plugins" != xnone; then
     fi
 fi
 
-ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather"
+ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui"
 
 
 
@@ -13251,6 +13251,7 @@ PLUGINS_LIST="\
     $plugin_cpufreq \
     $plugin_monitors \
     $plugin_indicator \
+    $plugin_dhcpcdui \
     $plugin_weather"
 
 
@@ -14995,6 +14996,20 @@ if test `eval "echo $sysconfdir"` = /usr/etc
 then
     sysconfdir=/etc
 fi
+
+# defines for dhcpcdui plugin
+
+$as_echo "#define HAS_GETTEXT 1" >>confdefs.h
+
+
+$as_echo "#define HAVE_STRVERSCMP 1" >>confdefs.h
+
+
+$as_echo "#define strlcpy(dst, src, n) ((size_t)snprintf(dst, n, \"%s\", src))" >>confdefs.h
+
+
+$as_echo "#define BG_SCAN 1" >>confdefs.h
+
 
 ac_config_files="$ac_config_files lxpanel.pc Makefile src/Makefile plugins/Makefile po/Makefile.in data/Makefile data/default/panels/panel data/two_panels/panels/top data/two_panels/panels/bottom man/Makefile"
 
@@ -17484,6 +17499,10 @@ $as_echo "    indicator - Indicator support" >&6; }
     if test x"$plugin_weather" != x; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result:     weather - Weather conditions and forecast" >&5
 $as_echo "    weather - Weather conditions and forecast" >&6; }
+    fi
+    if test x"$plugin_dhcpcdui" != x; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result:     dhcpcdui - WiFi network interface" >&5
+$as_echo "    dhcpcdui - WiFi network interface" >&6; }
     fi
 else
 echo Dynamic loader for plugins....... : disabled.

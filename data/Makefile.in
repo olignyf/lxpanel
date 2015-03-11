@@ -374,7 +374,22 @@ lxpanel_images_DATA = \
 	images/scrllock-off.png \
 	images/window-manager.png \
 	images/clock.png \
-	images/cpufreq-icon.png
+	images/cpufreq-icon.png \
+	images/network-wireless-connected-25.png \
+	images/network-wireless-connected-50.png \
+	images/network-wireless-connected-75.png \
+	images/network-wireless-connected-100.png \
+	images/dialog-ok-apply.png \
+	images/network-error.png \
+	images/network-idle.png \
+	images/network-offline.png \
+	images/network-receive.png \
+	images/network-transmit-receive.png \
+	images/network-transmit.png \
+	images/network-wired.png \
+	images/network-wireless-connected-00.png \
+	images/network-wireless-encrypted.png \
+	images/network-wireless.png
 
 lxpanel_imagesdir = $(datadir)/lxpanel/images
 EXTRA_DIST = \

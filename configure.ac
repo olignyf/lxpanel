@@ -209,6 +209,7 @@ plugin_thermal=
 plugin_cpufreq=
 plugin_monitors=
 plugin_indicator=
+plugin_dhcpcdui=
 
 AC_MSG_CHECKING([which plugins should be built dynamically])
 AC_ARG_WITH(plugins,
@@ -228,7 +229,7 @@ if test x"$plugins" != xall -a x"$plugins" != xnone; then
     fi
 fi
 
-ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather"
+ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui"
 AC_SUBST(ALL_PLUGINS_LIST)
 
 AC_DEFUN([check_plugin_name],[
@@ -298,6 +299,7 @@ PLUGINS_LIST="\
     $plugin_cpufreq \
     $plugin_monitors \
     $plugin_indicator \
+    $plugin_dhcpcdui \
     $plugin_weather"
 
 AC_SUBST(PLUGINS_LIST)
@@ -387,6 +389,12 @@ then
     sysconfdir=/etc
 fi
 
+# defines for dhcpcdui plugin
+AC_DEFINE([HAS_GETTEXT], [1], [Has gettext function])
+AC_DEFINE([HAVE_STRVERSCMP], [1], [Has strversmp function])
+AC_DEFINE([strlcpy(dst, src, n)],[((size_t)snprintf(dst, n, "%s", src))],[Replacement strlcpy function])
+AC_DEFINE([BG_SCAN], [1], [Perform regular network scans])
+
 AC_CONFIG_FILES([
     lxpanel.pc
     Makefile
@@ -451,6 +459,9 @@ echo Building dynamic plugins:
     fi
     if test x"$plugin_weather" != x; then
         AC_MSG_RESULT([    weather - Weather conditions and forecast])
+    fi
+    if test x"$plugin_dhcpcdui" != x; then
+        AC_MSG_RESULT([    dhcpcdui - WiFi network interface])
     fi
 else
 echo Dynamic loader for plugins....... : disabled.

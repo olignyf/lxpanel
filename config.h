@@ -1,6 +1,9 @@
 /* config.h.  Generated from config.h.in by configure.  */
 /* config.h.in.  Generated from configure.ac by autoheader.  */
 
+/* Perform regular network scans */
+#define BG_SCAN 1
+
 /* Disable menu related routines */
 /* #undef DISABLE_MENU */
 
@@ -12,6 +15,9 @@
 
 /* Gettext package. */
 #define GETTEXT_PACKAGE "lxpanel"
+
+/* Has gettext function */
+#define HAS_GETTEXT 1
 
 /* Define to 1 if you have the <alsa/asoundlib.h> header file. */
 #define HAVE_ALSA_ASOUNDLIB_H 1
@@ -81,6 +87,9 @@
 /* Define to 1 if you have the <string.h> header file. */
 #define HAVE_STRING_H 1
 
+/* Has strversmp function */
+#define HAVE_STRVERSCMP 1
+
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
@@ -148,3 +157,6 @@
 
 /* Define to rpl_malloc if the replacement function should be used. */
 /* #undef malloc */
+
+/* Replacement strlcpy function */
+#define strlcpy(dst, src, n) ((size_t)snprintf(dst, n, "%s", src))

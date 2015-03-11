@@ -63,7 +63,8 @@ EXTRA_LTLIBRARIES = \
 	volume.la \
 	volumealsa.la \
 	weather.la \
-	xkb.la
+	xkb.la \
+	dhcpcdui.la
 
 pkglibdir = $(libdir)/lxpanel/plugins
 
@@ -178,6 +179,18 @@ xkeyboardconfig_DATA = \
 	xkb/xkeyboardconfig/models.cfg \
 	xkb/xkeyboardconfig/layouts.cfg \
 	xkb/xkeyboardconfig/toggle.cfg
+
+# dhcpcdui
+dhcpcdui_la_SOURCES = \
+	dhcpcd-gtk/main.c \
+	dhcpcd-gtk/menu.c \
+	dhcpcd-gtk/prefs.c \
+	dhcpcd-gtk/wpa.c \
+	libdhcpcd/dhcpcd.c \
+	libdhcpcd/config.c \
+	libdhcpcd/wpa.c
+dhcpcdui_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/dhcpcd-gtk  -I$(srcdir)/libdhcpcd
+dhcpcdui_la_LDFLAGS = -module @LXPANEL_MODULE@
 
 flagsdir=$(datadir)/lxpanel/images/xkb-flags
 flags_DATA= \
