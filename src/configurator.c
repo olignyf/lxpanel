@@ -1390,13 +1390,16 @@ static void on_plugin_destroy(GtkWidget *plugin, GtkDialog *dlg)
 /* Handler for "response" signal from standard configuration dialog. */
 static void generic_config_dlg_response(GtkWidget * dlg, int response, Panel * panel)
 {
-    gpointer plugin = g_object_get_data(G_OBJECT(dlg), "generic-config-plugin");
-    if (plugin)
-        g_signal_handlers_disconnect_by_func(plugin, on_plugin_destroy, dlg);
-    g_object_set_data(G_OBJECT(dlg), "generic-config-plugin", NULL);
-    panel->plugin_pref_dialog = NULL;
-    gtk_widget_destroy(dlg);
-    panel_config_save(panel);
+    if (response == GTK_RESPONSE_CLOSE)
+    {
+    	gpointer plugin = g_object_get_data(G_OBJECT(dlg), "generic-config-plugin");
+    	if (plugin)
+        	g_signal_handlers_disconnect_by_func(plugin, on_plugin_destroy, dlg);
+    	g_object_set_data(G_OBJECT(dlg), "generic-config-plugin", NULL);
+    	panel->plugin_pref_dialog = NULL;
+    	gtk_widget_destroy(dlg);
+    	panel_config_save(panel);
+    }
 }
 
 void _panel_show_config_dialog(LXPanel *panel, GtkWidget *p, GtkWidget *dlg)
