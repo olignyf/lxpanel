@@ -35,32 +35,32 @@
 #define DEFAULT_CLOCK_FORMAT  "%R"
 
 #define ICON_BUTTON_TRIM 4
-#define CLOCK_TEXT_PAD	6
+#define CLOCK_TEXT_PAD    6
 
 /* Private context for digital clock plugin. */
 typedef struct {
-    GtkWidget * plugin;				/* Back pointer to plugin */
+    GtkWidget * plugin;                /* Back pointer to plugin */
     LXPanel * panel;
     config_setting_t *settings;
-    GtkWidget * clock_label;			/* Label containing clock value */
-    GtkWidget * clock_icon;			/* Icon when icon_only */
-    GtkWidget * calendar_window;		/* Calendar window, if it is being displayed */
-    char * clock_format;			/* Format string for clock value */
-    char * tooltip_format;			/* Format string for tooltip value */
-    char * action;				/* Command to execute on a click */
-    gboolean bold;				/* True if bold font */
-    gboolean icon_only;				/* True if icon only (no clock value) */
+    GtkWidget * clock_label;            /* Label containing clock value */
+    GtkWidget * clock_icon;            /* Icon when icon_only */
+    GtkWidget * calendar_window;        /* Calendar window, if it is being displayed */
+    char * clock_format;            /* Format string for clock value */
+    char * tooltip_format;            /* Format string for tooltip value */
+    char * action;                /* Command to execute on a click */
+    gboolean bold;                /* True if bold font */
+    gboolean icon_only;                /* True if icon only (no clock value) */
     int center_text;
-    guint timer;				/* Timer for periodic update */
+    guint timer;                /* Timer for periodic update */
     enum {
-	AWAITING_FIRST_CHANGE,			/* Experimenting to determine interval, waiting for first change */
-	AWAITING_SECOND_CHANGE,			/* Experimenting to determine interval, waiting for second change */
-	ONE_SECOND_INTERVAL,			/* Determined that one second interval is necessary */
-	ONE_MINUTE_INTERVAL			/* Determined that one minute interval is sufficient */
+    AWAITING_FIRST_CHANGE,            /* Experimenting to determine interval, waiting for first change */
+    AWAITING_SECOND_CHANGE,            /* Experimenting to determine interval, waiting for second change */
+    ONE_SECOND_INTERVAL,            /* Determined that one second interval is necessary */
+    ONE_MINUTE_INTERVAL            /* Determined that one minute interval is sufficient */
     } expiration_interval;
-    int experiment_count;			/* Count of experiments that have been done to determine interval */
-    char * prev_clock_value;			/* Previous value of clock */
-    char * prev_tooltip_value;			/* Previous value of tooltip */
+    int experiment_count;            /* Count of experiments that have been done to determine interval */
+    char * prev_clock_value;            /* Previous value of clock */
+    char * prev_tooltip_value;            /* Previous value of tooltip */
     GtkWidget *box, *grid;
 } DClockPlugin;
 
@@ -77,80 +77,80 @@ static void dclock_popup_map(GtkWidget * widget, DClockPlugin * dc)
 /* calculates how long (in pixels) a widget needs to be to hold the worst-case time in the current 24 hour period */
 static int longest_time (DClockPlugin *dc)
 {
-	struct timeval now;
-	struct tm *current_time;
-	int digit, maxval, maxdig, maxmin;
+    struct timeval now;
+    struct tm *current_time;
+    int digit, maxval, maxdig, maxmin;
     char clock_value[64];
     GtkRequisition req;
-    
-	// get today's date 
+
+    // get today's date
     gettimeofday (&now, NULL);
     current_time = localtime (&now.tv_sec);
-    
+
     // find the longest digit
     maxval = 0;
     maxdig = 0;
     for (digit = 0; digit < 10; digit++)
     {
-    	current_time->tm_min = digit;
-    	strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
-    	gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+        current_time->tm_min = digit;
+        strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
+        gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
         gtk_widget_size_request (dc->clock_label, &req);
         if (req.width > maxval)
         {
-        	maxval = req.width;
-        	maxdig = digit;
+            maxval = req.width;
+            maxdig = digit;
         }
     }
-    
+
     // maxdig now holds the widest digit - find the widest integer 00 - 59 for min and sec
-    
+
     if (maxdig < 6) maxmin = 10 * maxdig + maxdig;
     else
     {
-		maxmin = 0;
-		maxval = 0;
-		for (digit = 0; digit < 6; digit++)
-		{
-			current_time->tm_min = 10 * digit + maxdig;
-    		strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
-    		gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
-        	gtk_widget_size_request (dc->clock_label, &req);
-        	if (req.width > maxval)
-        	{
-        		maxval = req.width;
-        		maxmin = current_time->tm_min;
-        	}
-		}    
+        maxmin = 0;
+        maxval = 0;
+        for (digit = 0; digit < 6; digit++)
+        {
+            current_time->tm_min = 10 * digit + maxdig;
+            strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
+            gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+            gtk_widget_size_request (dc->clock_label, &req);
+            if (req.width > maxval)
+            {
+                maxval = req.width;
+                maxmin = current_time->tm_min;
+            }
+        }
     }
-    
+
     // maxmin now holds the longest minute and second value - find the longest hour, incl am and pm
-    
+
     current_time->tm_min = maxmin;
     current_time->tm_sec = maxmin;
     maxval = 0;
-	for (digit = 0; digit < 23; digit++)
-	{
-		current_time->tm_hour = digit;
-    	strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
-    	gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+    for (digit = 0; digit < 23; digit++)
+    {
+        current_time->tm_hour = digit;
+        strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
+        gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
         gtk_widget_size_request (dc->clock_label, &req);
         if (req.width > maxval)
         {
-        	maxval = req.width;
+            maxval = req.width;
         }
-	}   
-	
-	// maxval is now width in pixels of longest time today...
-	
-	// put the clock back to where it should be
+    }
+
+    // maxval is now width in pixels of longest time today...
+
+    // put the clock back to where it should be
     gettimeofday (&now, NULL);
     current_time = localtime (&now.tv_sec);
     strftime (clock_value, sizeof (clock_value), dc->clock_format, current_time);
     gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
 
-	return maxval;
-} 
+    return maxval;
+}
 
 /* Display a window containing the standard calendar widget. */
 static GtkWidget * dclock_create_calendar(DClockPlugin * dc)
@@ -239,16 +239,16 @@ static void dclock_timer_set(DClockPlugin * dc, struct timeval *current_time)
 /* Compare length and content of two strings to see how much they have in common */
 static int strdiff (char *str1, char *str2)
 {
-	int index, diffs = 0;
-	int l1 = strlen (str1);
-	int l2 = strlen (str2);
-	
-	if (l1 != l2) return 1;
-	for (index = 0; index < l1; index++)
-		if (str1[index] != str2[index]) diffs++;
-		
-	if (diffs > 3) return 1;
-	return 0;	
+    int index, diffs = 0;
+    int l1 = strlen (str1);
+    int l2 = strlen (str2);
+
+    if (l1 != l2) return 1;
+    for (index = 0; index < l1; index++)
+        if (str1[index] != str2[index]) diffs++;
+
+    if (diffs > 3) return 1;
+    return 0;
 }
 
 /* Periodic timer callback.
@@ -281,18 +281,18 @@ static gboolean dclock_update_display(DClockPlugin * dc)
     if (( ! dc->icon_only)
     && ((dc->prev_clock_value == NULL) || (strcmp(dc->prev_clock_value, clock_value) != 0)))
     {
-    	// update the text widget length if the contents have changed significantly....
-    	if (dc->prev_clock_value == NULL || strdiff (clock_value, dc->prev_clock_value))
-    	{
-    		panel_icon_grid_set_geometry (PANEL_ICON_GRID(dc->grid), panel_get_orientation (dc->panel), longest_time (dc) + CLOCK_TEXT_PAD, 
-    			panel_get_icon_size (dc->panel), 0, 0, panel_get_height (dc->panel));
-		}
+        // update the text widget length if the contents have changed significantly....
+        if (dc->prev_clock_value == NULL || strdiff (clock_value, dc->prev_clock_value))
+        {
+            panel_icon_grid_set_geometry (PANEL_ICON_GRID(dc->grid), panel_get_orientation (dc->panel), longest_time (dc) + CLOCK_TEXT_PAD,
+                panel_get_icon_size (dc->panel), 0, 0, panel_get_height (dc->panel));
+        }
 
         /* Convert "\n" escapes in the user's format string to newline characters. */
         char * newlines_converted = NULL;
         if (strstr(clock_value, "\\n") != NULL)
         {
-            newlines_converted = g_strdup(clock_value);	/* Just to get enough space for the converted result */
+            newlines_converted = g_strdup(clock_value);    /* Just to get enough space for the converted result */
             char * p;
             char * q;
             for (p = clock_value, q = newlines_converted; *p != '\0'; p += 1)
@@ -383,9 +383,9 @@ static gboolean dclock_update_display(DClockPlugin * dc)
 static gboolean
 pass_signal(GtkWidget *widget, GdkEventButton *event, DClockPlugin *dc)
 {
-	gboolean res;
-	g_signal_emit_by_name (G_OBJECT(dc->box), "button-press-event", event, &res);
-	return TRUE;
+    gboolean res;
+    g_signal_emit_by_name (G_OBJECT(dc->box), "button-press-event", event, &res);
+    return TRUE;
 }
 
 /* Plugin constructor. */
@@ -419,13 +419,13 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
     lxpanel_plugin_set_data (dc->box, dc, dclock_destructor);
     gtk_container_set_border_width (GTK_CONTAINER (dc->box), 0);
 
-	// width of 50 is just a placeholder; it gets overwritten later...
+    // width of 50 is just a placeholder; it gets overwritten later...
     dc->grid = panel_icon_grid_new (panel_get_orientation (panel), 50, panel_get_icon_size (panel),
-    	3, 0, panel_get_height (panel));
+        3, 0, panel_get_height (panel));
     gtk_container_set_border_width (GTK_CONTAINER (dc->grid), 0);
     gtk_box_pack_start (GTK_BOX (dc->box), dc->grid, FALSE, TRUE, 0);
     gtk_widget_set_visible (dc->grid, TRUE);
-    
+
     dc->plugin = gtk_button_new ();
     g_signal_connect (G_OBJECT (dc->plugin), "button-press-event", G_CALLBACK (pass_signal), dc);
     gtk_widget_set_visible (dc->plugin, TRUE);
@@ -439,7 +439,7 @@ static GtkWidget *dclock_constructor(LXPanel *panel, config_setting_t *settings)
 
     /* Create a label and an image as children of the horizontal box.
      * Only one of these is visible at a time, controlled by user preference. */
-    dc->clock_label = gtk_label_new(NULL);  
+    dc->clock_label = gtk_label_new(NULL);
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_label);
     dc->clock_icon = gtk_image_new();
     gtk_container_add(GTK_CONTAINER(hbox), dc->clock_icon);
@@ -486,7 +486,7 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     struct timeval now;
     int newwidth = 0;
     GtkRequisition req;
-    
+
     /* stop the updater now */
     if (dc->timer)
         g_source_remove(dc->timer);
@@ -494,101 +494,101 @@ static gboolean dclock_apply_configuration(gpointer user_data)
     /* Set up the icon or the label as the displayable widget. */
     if (dc->icon_only)
     {
-		GdkPixbuf * pixbuf = gdk_pixbuf_new_from_file_at_scale(PACKAGE_DATA_DIR "/images/clock.png", 
-			panel_get_icon_size(dc->panel) - ICON_BUTTON_TRIM, panel_get_icon_size(dc->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
-    	if (pixbuf != NULL)
-    	{
-        	gtk_image_set_from_pixbuf(GTK_IMAGE(dc->clock_icon), pixbuf);
-        	g_object_unref(pixbuf);
-    	}
+        GdkPixbuf * pixbuf = gdk_pixbuf_new_from_file_at_scale(PACKAGE_DATA_DIR "/images/clock.png",
+            panel_get_icon_size(dc->panel) - ICON_BUTTON_TRIM, panel_get_icon_size(dc->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
+        if (pixbuf != NULL)
+        {
+            gtk_image_set_from_pixbuf(GTK_IMAGE(dc->clock_icon), pixbuf);
+            g_object_unref(pixbuf);
+        }
         gtk_widget_show(dc->clock_icon);
         gtk_widget_hide(dc->clock_label);
-    	newwidth = panel_get_icon_size(dc->panel);
+        newwidth = panel_get_icon_size(dc->panel);
     }
     else
     {
-    	/* find how big the button will need to be... */
-    	struct timeval now;
-    	struct tm *current_time;
-    	char clock_value[64];
-    	int maxlen, maxday, maxmon, curday, curmon;
-    	char findu[3], findl[3];
-    	
+        /* find how big the button will need to be... */
+        struct timeval now;
+        struct tm *current_time;
+        char clock_value[64];
+        int maxlen, maxday, maxmon, curday, curmon;
+        char findu[3], findl[3];
+
         gtk_widget_show(dc->clock_label);
         gtk_widget_hide(dc->clock_icon);
-        
-    	if (dc->clock_format != NULL)
-    	{
-#if 0    	
-    		// get the current time as a starting point
-    		gettimeofday (&now, NULL);
-    		current_time = localtime (&now.tv_sec);
-        	
-    		// if clock_format contains %A, %a, %B or %b, need to loop through days (a) or months (b) to find longest...
-    		
-    		// find longest day of week
-    		sprintf (findu, "%%A");
-    		sprintf (findl, "%%a");
-    		maxday = 0;
-    		curday = current_time->tm_wday;
-    		if (strstr (dc->clock_format, findu) != NULL || strstr (dc->clock_format, findl) != NULL)
-    		{
-    			maxlen = 0;
-    			for (current_time->tm_wday = 0; current_time->tm_wday < 7; current_time->tm_wday++)
-    			{
-    				strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
-    				gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
-        			gtk_widget_size_request (dc->clock_label, &req);
-    				if (req.width > maxlen) 
-    				{
-    					maxlen = req.width;
-    					maxday = current_time->tm_wday;
-    				}
-    			}
-    		}
-    	
-    		// find longest month name
-    		sprintf (findu, "%%B");
-    		sprintf (findl, "%%b");
-    		maxmon = 0;
-    		curmon = current_time->tm_mon;
-    		if (strstr (dc->clock_format, findu) != NULL || strstr (dc->clock_format, findl) != NULL)
-    		{
-    			maxlen = 0;
-    			for (current_time->tm_mon = 0; current_time->tm_mon < 12; current_time->tm_mon++)
-    			{
-    				strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
-    				gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
-        			gtk_widget_size_request (dc->clock_label, &req);
-    				if (req.width > maxlen) 
-    				{
-    					maxlen = req.width;
-    					maxmon = current_time->tm_mon;
-    				}
-    			}
-    		}
-    		
-    		// get maximum length
-    		current_time->tm_wday = maxday;
-    		current_time->tm_mon = maxmon;
-     		strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
-    		gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
-       		gtk_widget_size_request (dc->clock_label, &req);
-        	maxlen = req.width;
+
+        if (dc->clock_format != NULL)
+        {
+#if 0
+            // get the current time as a starting point
+            gettimeofday (&now, NULL);
+            current_time = localtime (&now.tv_sec);
+
+            // if clock_format contains %A, %a, %B or %b, need to loop through days (a) or months (b) to find longest...
+
+            // find longest day of week
+            sprintf (findu, "%%A");
+            sprintf (findl, "%%a");
+            maxday = 0;
+            curday = current_time->tm_wday;
+            if (strstr (dc->clock_format, findu) != NULL || strstr (dc->clock_format, findl) != NULL)
+            {
+                maxlen = 0;
+                for (current_time->tm_wday = 0; current_time->tm_wday < 7; current_time->tm_wday++)
+                {
+                    strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
+                    gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+                    gtk_widget_size_request (dc->clock_label, &req);
+                    if (req.width > maxlen)
+                    {
+                        maxlen = req.width;
+                        maxday = current_time->tm_wday;
+                    }
+                }
+            }
+
+            // find longest month name
+            sprintf (findu, "%%B");
+            sprintf (findl, "%%b");
+            maxmon = 0;
+            curmon = current_time->tm_mon;
+            if (strstr (dc->clock_format, findu) != NULL || strstr (dc->clock_format, findl) != NULL)
+            {
+                maxlen = 0;
+                for (current_time->tm_mon = 0; current_time->tm_mon < 12; current_time->tm_mon++)
+                {
+                    strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
+                    gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+                    gtk_widget_size_request (dc->clock_label, &req);
+                    if (req.width > maxlen)
+                    {
+                        maxlen = req.width;
+                        maxmon = current_time->tm_mon;
+                    }
+                }
+            }
+
+            // get maximum length
+            current_time->tm_wday = maxday;
+            current_time->tm_mon = maxmon;
+             strftime (clock_value, sizeof(clock_value), dc->clock_format, current_time);
+            gtk_label_set_text (GTK_LABEL (dc->clock_label), clock_value);
+               gtk_widget_size_request (dc->clock_label, &req);
+            maxlen = req.width;
 #endif
-    		newwidth = longest_time (dc) + CLOCK_TEXT_PAD;
-    	}
+            newwidth = longest_time (dc) + CLOCK_TEXT_PAD;
+        }
     }
-    
-    panel_icon_grid_set_geometry(PANEL_ICON_GRID(dc->grid), panel_get_orientation(dc->panel), newwidth, 
-    	panel_get_icon_size(dc->panel), 0, 0, panel_get_height(dc->panel));
-	
+
+    panel_icon_grid_set_geometry(PANEL_ICON_GRID(dc->grid), panel_get_orientation(dc->panel), newwidth,
+        panel_get_icon_size(dc->panel), 0, 0, panel_get_height(dc->panel));
+
     if (dc->center_text == 2)
-    	gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 1.0, 0.5);
+        gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 1.0, 0.5);
     else if (dc->center_text == 1)
-    	gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.5, 0.5); 
+        gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.5, 0.5);
     else
-    	gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.0, 0.5);
+        gtk_misc_set_alignment(GTK_MISC(dc->clock_label), 0.0, 0.5);
 
     /* Rerun the experiment to determine update interval and update the display. */
     g_free(dc->prev_clock_value);

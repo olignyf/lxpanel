@@ -467,65 +467,65 @@ static void process_client_msg ( XClientMessageEvent* ev )
             break;
         case LXPANEL_CMD_REFRESH:
             {
-            	LXPanel * p = ((all_panels != NULL) ? all_panels->data : NULL);
-            	if (p != NULL)
-            	{
-            		// at some point I may need to read some more parameters here, but this will do for now...
-					char linebuf[256], posbuf[16];
-					int val;
-					FILE *fp = fopen (_user_config_file_name ("panels", p->priv->name), "rb");
-					while (!feof (fp))
-					{
-						if (fgets (linebuf, 256, fp))
-						{
-							if (sscanf (linebuf, "%*[ \t]iconsize=%d", &val) == 1)
-							{
-								p->priv->icon_size = val;
-								p->priv->height = val;										
-								panel_set_panel_configuration_changed (p->priv);
-							}
-							if (sscanf (linebuf, "%*[ \t]edge=%s", posbuf) == 1)
-							{
-								if (!strcmp (posbuf, "bottom")) 
-								{
-									if (p->priv->edge != EDGE_BOTTOM) 
-									{
-										p->priv->edge = EDGE_BOTTOM;
-										update_panel_geometry (p);
-									}
-								}
-								else 
-								{
-									if (p->priv->edge != EDGE_TOP)
-									{
-										p->priv->edge = EDGE_TOP;
-										update_panel_geometry (p);
-									}
-								}
-							}
-						}
-					}
-            	}
+                LXPanel * p = ((all_panels != NULL) ? all_panels->data : NULL);
+                if (p != NULL)
+                {
+                    // at some point I may need to read some more parameters here, but this will do for now...
+                    char linebuf[256], posbuf[16];
+                    int val;
+                    FILE *fp = fopen (_user_config_file_name ("panels", p->priv->name), "rb");
+                    while (!feof (fp))
+                    {
+                        if (fgets (linebuf, 256, fp))
+                        {
+                            if (sscanf (linebuf, "%*[ \t]iconsize=%d", &val) == 1)
+                            {
+                                p->priv->icon_size = val;
+                                p->priv->height = val;
+                                panel_set_panel_configuration_changed (p->priv);
+                            }
+                            if (sscanf (linebuf, "%*[ \t]edge=%s", posbuf) == 1)
+                            {
+                                if (!strcmp (posbuf, "bottom"))
+                                {
+                                    if (p->priv->edge != EDGE_BOTTOM)
+                                    {
+                                        p->priv->edge = EDGE_BOTTOM;
+                                        update_panel_geometry (p);
+                                    }
+                                }
+                                else
+                                {
+                                    if (p->priv->edge != EDGE_TOP)
+                                    {
+                                        p->priv->edge = EDGE_TOP;
+                                        update_panel_geometry (p);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
             }
             break;
         case LXPANEL_CMD_ALSACONF:
-        	{
-            	GSList* l;
-            	for( l = all_panels; l; l = l->next )
-            	{
-                	LXPanel* p = (LXPanel*)l->data;
-                	GList *plugins, *pl;
+            {
+                GSList* l;
+                for( l = all_panels; l; l = l->next )
+                {
+                    LXPanel* p = (LXPanel*)l->data;
+                    GList *plugins, *pl;
 
-                	plugins = gtk_container_get_children(GTK_CONTAINER(p->priv->box));
-                	for (pl = plugins; pl; pl = pl->next)
-                	{
-        				GtkWidget *w = (GtkWidget*)pl->data;
-                    	const LXPanelPluginInit *init = PLUGIN_CLASS(pl->data);
-                    	if (!strcmp (init->name, "Volume Control") && init->reconfigure)
-                        	init->reconfigure(p, w);
-                	}
-                	g_list_free(plugins);
-            	}
+                    plugins = gtk_container_get_children(GTK_CONTAINER(p->priv->box));
+                    for (pl = plugins; pl; pl = pl->next)
+                    {
+                        GtkWidget *w = (GtkWidget*)pl->data;
+                        const LXPanelPluginInit *init = PLUGIN_CLASS(pl->data);
+                        if (!strcmp (init->name, "Volume Control") && init->reconfigure)
+                            init->reconfigure(p, w);
+                    }
+                    g_list_free(plugins);
+                }
             }
             break;
     }

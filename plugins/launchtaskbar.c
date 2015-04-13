@@ -187,8 +187,8 @@ struct LaunchTaskBarPlugin {
     gboolean         lb_built;
     gboolean         tb_built;
     gboolean         fixed_mode;        /* if mode cannot be changed */
-	LaunchButton	*lastb;
-	guint			timeout;
+    LaunchButton    *lastb;
+    guint            timeout;
 };
 
 static gchar *launchtaskbar_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
@@ -206,7 +206,7 @@ static gchar *launchtaskbar_rc = "style 'launchtaskbar-style' = 'theme-panel'\n"
 #define TASK_WIDTH_MAX       200
 #define ALL_WORKSPACES       -1
 
-#define ICON_BUTTON_TRIM 	 4      /* Amount needed to have button remain on panel */
+#define ICON_BUTTON_TRIM      4      /* Amount needed to have button remain on panel */
 
 extern GtkWidget *_gtk_image_new_for_icon(FmIcon *icon, gint size);
 
@@ -337,7 +337,7 @@ static void launchbutton_free(LaunchButton * btn)
 
 static gboolean unlock_button (gpointer user_data)
 {
-	/* handler for launch dead period timeout following click on launchbar */
+    /* handler for launch dead period timeout following click on launchbar */
     LaunchTaskBarPlugin *ltbp = (LaunchTaskBarPlugin *) user_data;
     ltbp->timeout = 0;
     return FALSE;
@@ -348,36 +348,36 @@ static gboolean unlock_button (gpointer user_data)
 static gboolean launchbutton_press_event(GtkWidget * widget, GdkEventButton * event, LXPanel * p)
 {
     LaunchTaskBarPlugin *ltbp = lxpanel_plugin_get_data(widget);
-    
+
     if (ltbp->timeout == 0)
     {
         ltbp->timeout = g_timeout_add (1000, unlock_button, ltbp);
-    
-    	if (event->button == 1 && event->type == GDK_BUTTON_PRESS) /* left button */
-    	{
-        	if (ltbp->lastb->fi == NULL)  /* The bootstrap button */
-            	lxpanel_plugin_show_config_dialog(ltbp->lastb->p->plugin);
-        	else
-            	lxpanel_launch_path(p, fm_file_info_get_path(ltbp->lastb->fi));
-        	return TRUE;
-    	}
-    	return FALSE;
+
+        if (event->button == 1 && event->type == GDK_BUTTON_PRESS) /* left button */
+        {
+            if (ltbp->lastb->fi == NULL)  /* The bootstrap button */
+                lxpanel_plugin_show_config_dialog(ltbp->lastb->p->plugin);
+            else
+                lxpanel_launch_path(p, fm_file_info_get_path(ltbp->lastb->fi));
+            return TRUE;
+        }
+        return FALSE;
     }
-    else 
+    else
     {
-    	/* restart a new timer */
-    	g_source_remove (ltbp->timeout);
-    	ltbp->timeout = g_timeout_add (1000, unlock_button, ltbp);
-    	return TRUE;
+        /* restart a new timer */
+        g_source_remove (ltbp->timeout);
+        ltbp->timeout = g_timeout_add (1000, unlock_button, ltbp);
+        return TRUE;
     }
 }
 
 static gboolean pass_signal(GtkWidget *widget, GdkEventButton *event, LaunchButton *btn)
 {
-	gboolean res;
-	btn->p->lastb = btn;
-	g_signal_emit_by_name (G_OBJECT(btn->p->plugin), "button-press-event", event, &res);
-	return TRUE;
+    gboolean res;
+    btn->p->lastb = btn;
+    g_signal_emit_by_name (G_OBJECT(btn->p->plugin), "button-press-event", event, &res);
+    return TRUE;
 }
 
 /* Handler for "drag-motion" event from launchtaskbar button. */
@@ -416,12 +416,12 @@ static void launchbutton_build_bootstrap(LaunchTaskBarPlugin *lb)
         //GtkWidget * event_box = gtk_event_box_new();
         GtkWidget * event_box = gtk_button_new();
         gtk_container_set_border_width(GTK_CONTAINER(event_box), 0);
-    	gtk_button_set_relief (GTK_BUTTON (event_box), GTK_RELIEF_NONE);
-    	GTK_WIDGET_UNSET_FLAGS (event_box, GTK_CAN_FOCUS);
-    
+        gtk_button_set_relief (GTK_BUTTON (event_box), GTK_RELIEF_NONE);
+        GTK_WIDGET_UNSET_FLAGS (event_box, GTK_CAN_FOCUS);
+
         lb->bootstrap_button->widget = event_box;
         //!!!!SPLg_signal_connect(event_box, "button-press-event", G_CALLBACK(launchbutton_press_event), lb->bootstrap_button);
-    	g_signal_connect(event_box, "button-press-event", G_CALLBACK(pass_signal), lb->bootstrap_button);
+        g_signal_connect(event_box, "button-press-event", G_CALLBACK(pass_signal), lb->bootstrap_button);
 
         /* Create an image containing the stock "Add" icon as a child of the event box. */
         lb->add_icon = fm_icon_from_name(GTK_STOCK_ADD);
@@ -538,11 +538,11 @@ static LaunchButton *launchbutton_for_file_info(LaunchTaskBarPlugin * lb, FmFile
     gtk_container_set_border_width (GTK_CONTAINER (button), 0);
     gtk_button_set_relief (GTK_BUTTON (button), GTK_RELIEF_NONE);
     GTK_WIDGET_UNSET_FLAGS (button, GTK_CAN_FOCUS);
-    
+
     GtkWidget * image = _gtk_image_new_for_icon (fm_file_info_get_icon (fi), lb->icon_size - ICON_BUTTON_TRIM);
     gtk_misc_set_padding (GTK_MISC (image), 0, 0);
     gtk_misc_set_alignment (GTK_MISC (image), 0.5, 0.5);
-    
+
     gtk_container_add (GTK_CONTAINER (button), image);
     gtk_widget_show_all (button);
 
@@ -1423,10 +1423,10 @@ static GtkWidget *launchtaskbar_configure(LXPanel *panel, GtkWidget *p)
         ltbp->p_notebook_page_launch = gtk_notebook_get_nth_page(ltbp->p_notebook, 0);
         ltbp->p_notebook_page_task = gtk_notebook_get_nth_page(ltbp->p_notebook, 1);
         set_config_visibility(ltbp);
-	object = gtk_builder_get_object(builder, "combobox_mode");
+    object = gtk_builder_get_object(builder, "combobox_mode");
         gtk_combo_box_set_active(GTK_COMBO_BOX(object), ltbp->mode);
-	g_signal_connect(object, "changed",
-			G_CALLBACK(on_combobox_mode_changed), ltbp);
+    g_signal_connect(object, "changed",
+            G_CALLBACK(on_combobox_mode_changed), ltbp);
 
 #define SETUP_TOGGLE_BUTTON(button,member) \
         object = gtk_builder_get_object(builder, #button); \
@@ -1658,7 +1658,7 @@ static void task_draw_label(Task * tk)
 
     //lxpanel_draw_label_text(tk->tb->panel, tk->label, label, bold_style, 1,
     //        tk->tb->flat_button);
-	gtk_label_set_text (GTK_LABEL(tk->label), label);
+    gtk_label_set_text (GTK_LABEL(tk->label), label);
 
     g_free(label);
 }

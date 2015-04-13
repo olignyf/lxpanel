@@ -1327,16 +1327,16 @@ static void on_toggle_changed( GtkToggleButton* btn, gpointer user_data )
 static void on_radio_changed( GtkRadioButton* btn, gpointer user_data )
 {
     gboolean* val = (gboolean*)user_data;
-    
+
     GSList *group = gtk_radio_button_get_group (btn);
     GtkRadioButton *tbtn;
     int nbtn = 0, sbtn;
     while (group)
     {
-    	tbtn = group->data;
-    	group = group->next;
-    	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tbtn))) sbtn = nbtn;
-    	nbtn++;
+        tbtn = group->data;
+        group = group->next;
+        if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON (tbtn))) sbtn = nbtn;
+        nbtn++;
     }
     *val = nbtn - sbtn - 1;
     notify_apply_config( GTK_WIDGET(btn) );
@@ -1392,13 +1392,13 @@ static void generic_config_dlg_response(GtkWidget * dlg, int response, Panel * p
 {
     if (response == GTK_RESPONSE_CLOSE)
     {
-    	gpointer plugin = g_object_get_data(G_OBJECT(dlg), "generic-config-plugin");
-    	if (plugin)
-        	g_signal_handlers_disconnect_by_func(plugin, on_plugin_destroy, dlg);
-    	g_object_set_data(G_OBJECT(dlg), "generic-config-plugin", NULL);
-    	panel->plugin_pref_dialog = NULL;
-    	gtk_widget_destroy(dlg);
-    	panel_config_save(panel);
+        gpointer plugin = g_object_get_data(G_OBJECT(dlg), "generic-config-plugin");
+        if (plugin)
+            g_signal_handlers_disconnect_by_func(plugin, on_plugin_destroy, dlg);
+        g_object_set_data(G_OBJECT(dlg), "generic-config-plugin", NULL);
+        panel->plugin_pref_dialog = NULL;
+        gtk_widget_destroy(dlg);
+        panel_config_save(panel);
     }
 }
 
@@ -1447,8 +1447,8 @@ static GtkWidget *_lxpanel_generic_config_dlg(const char *title, Panel *p,
 
     gtk_box_set_spacing( dlg_vbox, 4 );
 
-	int rb_group = 0;
-	GtkWidget *lastbtn;
+    int rb_group = 0;
+    GtkWidget *lastbtn;
     while( name )
     {
         GtkWidget* label = gtk_label_new( name );
@@ -1502,28 +1502,28 @@ static GtkWidget *_lxpanel_generic_config_dlg(const char *title, Panel *p,
             case CONF_TYPE_COLOR:
                 {
                 entry = gtk_color_button_new();
-				gtk_color_button_set_color (GTK_COLOR_BUTTON (entry), val);
-				g_signal_connect (entry, "color-set", G_CALLBACK (on_color_button_set), val);
+                gtk_color_button_set_color (GTK_COLOR_BUTTON (entry), val);
+                g_signal_connect (entry, "color-set", G_CALLBACK (on_color_button_set), val);
                 }
                 break;
             case CONF_TYPE_RBUTTON:
-            	if (!rb_group)
-            	{
-            		entry = gtk_radio_button_new_with_label (NULL, name);
-                	g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
-                	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (entry), * (int *) val == rb_group);
-            		gtk_radio_button_group (GTK_RADIO_BUTTON (entry));
-            		lastbtn = entry;
-            		rb_group++;
-            	}
-            	else 
-            	{
-            		entry = gtk_radio_button_new_with_label (gtk_radio_button_group (GTK_RADIO_BUTTON (lastbtn)), name); 
-                	g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
-                	gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (entry), * (int *) val == rb_group);
-            		lastbtn = entry;
-            		rb_group++;
-            	}
+                if (!rb_group)
+                {
+                    entry = gtk_radio_button_new_with_label (NULL, name);
+                    g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
+                    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (entry), * (int *) val == rb_group);
+                    gtk_radio_button_group (GTK_RADIO_BUTTON (entry));
+                    lastbtn = entry;
+                    rb_group++;
+                }
+                else
+                {
+                    entry = gtk_radio_button_new_with_label (gtk_radio_button_group (GTK_RADIO_BUTTON (lastbtn)), name);
+                    g_signal_connect (entry, "toggled", G_CALLBACK(on_radio_changed), val);
+                    gtk_toggle_button_set_active (GTK_TOGGLE_BUTTON (entry), * (int *) val == rb_group);
+                    lastbtn = entry;
+                    rb_group++;
+                }
                 break;
         }
         if( entry )

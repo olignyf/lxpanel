@@ -106,14 +106,14 @@ static void redraw_pixmap(CPUPlugin * c)
     cairo_line_to(cr, c->pixmap_width, 0);
     cairo_line_to(cr, 0, 0);
     cairo_stroke(cr);
-	
+
 	if (c->show_percentage)
 	{
 		#define FONT_SIZE 12
     	char buffer[10];
     	int val = 100 * c->stats_cpu[c->ring_cursor - 1];
     	sprintf (buffer, "%3d %%", val);
-    	cairo_select_font_face (cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
+        cairo_select_font_face (cr, "monospace", CAIRO_FONT_SLANT_NORMAL, CAIRO_FONT_WEIGHT_NORMAL);
     	cairo_set_font_size (cr, FONT_SIZE);
     	cairo_set_source_rgb (cr, 0, 0, 0);
     	cairo_move_to (cr, 5, ((c->pixmap_height + FONT_SIZE) / 2) - 1);
@@ -265,7 +265,7 @@ static GtkWidget *cpu_constructor(LXPanel *panel, config_setting_t *settings)
 	c->settings = settings;
     if (config_setting_lookup_int(settings, "ShowPercent", &tmp_int))
         c->show_percentage = tmp_int != 0;
-        
+
     if (config_setting_lookup_string(settings, "Foreground", &str))
     {
     	if (!gdk_color_parse (str, &c->foreground_color))

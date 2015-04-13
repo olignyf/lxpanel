@@ -33,19 +33,19 @@ enum {
 /* Representative of an icon grid.  This is a manager that packs widgets into a rectangular grid whose size adapts to conditions. */
 struct _PanelIconGrid
 {
-    GtkContainer container;			/* Parent widget */
-    GList * children;				/* List of icon grid elements */
-    GtkOrientation orientation;			/* Desired orientation */
-    gint child_width;				/* Desired child width */
-    gint child_height;				/* Desired child height */
-    gint spacing;				/* Desired spacing between grid elements */
-    gint target_dimension;			/* Desired dimension perpendicular to orientation */
-    gboolean constrain_width : 1;		/* True if width should be constrained by allocated space */
-    gboolean fill_width : 1;			/* True if children should fill unused width */
-    int rows;					/* Computed layout rows */
-    int columns;				/* Computed layout columns */
-    int constrained_child_width;		/* Child width constrained by allocation */
-    GdkWindow *event_window;			/* Event window if NO_WINDOW is set */
+    GtkContainer container;            /* Parent widget */
+    GList * children;                  /* List of icon grid elements */
+    GtkOrientation orientation;        /* Desired orientation */
+    gint child_width;                  /* Desired child width */
+    gint child_height;                 /* Desired child height */
+    gint spacing;                      /* Desired spacing between grid elements */
+    gint target_dimension;             /* Desired dimension perpendicular to orientation */
+    gboolean constrain_width : 1;      /* True if width should be constrained by allocated space */
+    gboolean fill_width : 1;           /* True if children should fill unused width */
+    int rows;                          /* Computed layout rows */
+    int columns;                       /* Computed layout columns */
+    int constrained_child_width;       /* Child width constrained by allocation */
+    GdkWindow *event_window;           /* Event window if NO_WINDOW is set */
 };
 
 struct _PanelIconGridClass
@@ -213,7 +213,7 @@ static void panel_icon_grid_size_request(GtkWidget *widget,
     {
         /* In horizontal orientation, fit as many rows into the available height as possible.
          * Then allocate as many columns as necessary.  Guard against zerodivides. */
-        //!!!!SPL hard code this to 1 row... 
+        //!!!!SPL hard code this to 1 row...
         //ig->rows = 0;
         //if ((ig->child_height + ig->spacing) != 0)
         //    ig->rows = (target_dimension + ig->spacing - border * 2) / (ig->child_height + ig->spacing);

@@ -810,7 +810,7 @@ calculate_width(int scrw, int wtype, int allign, int margin,
                   margin, scrw);
             margin = 0;
         }
-	*panw = MIN(scrw - margin, *panw);
+    *panw = MIN(scrw - margin, *panw);
     }
     DBG("OUT panw=%d\n", *panw);
     if (allign == ALLIGN_LEFT)
@@ -1201,7 +1201,7 @@ char* translate_exec_to_cmd( const char* exec, const char* icon,
 {
     GString* cmd = g_string_sized_new( 256 );
     if (!exec)
-	    return NULL;
+        return NULL;
     for( ; *exec; ++exec )
     {
         if( G_UNLIKELY(*exec == '%') )
@@ -1459,14 +1459,14 @@ gboolean lxpanel_launch_app(const char* exec, GList* files, gboolean in_terminal
     cmd = translate_app_exec_to_command_line(exec, files);
     if( in_terminal )
     {
-	char * escaped_cmd = g_shell_quote(cmd);
+    char * escaped_cmd = g_shell_quote(cmd);
         char* term_cmd;
         const char* term = fm_config->terminal ? fm_config->terminal : "lxterminal";
         if( strstr(term, "%s") )
             term_cmd = g_strdup_printf(term, escaped_cmd);
         else
             term_cmd = g_strconcat( term, " -e ", escaped_cmd, NULL );
-	g_free(escaped_cmd);
+        g_free(escaped_cmd);
         if( cmd != exec )
             g_free(cmd);
         cmd = term_cmd;
