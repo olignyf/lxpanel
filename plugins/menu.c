@@ -472,7 +472,7 @@ static GtkWidget* create_item(MenuCacheItem *item, menup *m)
 
 gboolean check_close (GtkWidget *widget, GdkEventKey *event, gpointer userdata)
 {
-    if (event->keyval == 65482 && event->state == 0)
+    if ((event->keyval == 65515 || event->keyval == 65482) && event->state == 0)
     {
         gtk_menu_popdown (GTK_MENU (userdata));
         return TRUE;
