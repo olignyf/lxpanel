@@ -521,7 +521,7 @@ static void process_client_msg ( XClientMessageEvent* ev )
                     {
                         GtkWidget *w = (GtkWidget*)pl->data;
                         const LXPanelPluginInit *init = PLUGIN_CLASS(pl->data);
-                        if (!strcmp (init->name, "Volume Control") && init->reconfigure)
+                        if (!strcmp (init->name, "Volume Control (ALSA)") && init->reconfigure)
                             init->reconfigure(p, w);
                     }
                     g_list_free(plugins);
