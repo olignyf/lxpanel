@@ -1434,7 +1434,7 @@ static GtkWidget *_lxpanel_generic_config_dlg(const char *title, Panel *p,
                                               const char *name, va_list args)
 {
     GtkWidget* dlg = gtk_dialog_new_with_buttons( title, NULL, 0,
-                                                  GTK_STOCK_CLOSE,
+                                                  GTK_STOCK_OK,
                                                   GTK_RESPONSE_CLOSE,
                                                   NULL );
     GtkBox *dlg_vbox = GTK_BOX(gtk_dialog_get_content_area(GTK_DIALOG(dlg)));
