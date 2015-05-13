@@ -39,4 +39,8 @@
 	../plugins/indicator/indicator.c \
 	../plugins/monitors/monitors.c \
 	../plugins/weather/weatherwidget.c \
-	../plugins/weather/weather.c
+	../plugins/weather/weather.c \
+	../plugins/dhcpcd-gtk/main.c \
+	../plugins/dhcpcd-gtk/menu.c \
+	../plugins/dhcpcd-gtk/prefs.c \
+	../plugins/dhcpcd-gtk/wpa.c

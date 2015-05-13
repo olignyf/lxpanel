@@ -123,7 +123,7 @@
 #define PACKAGE_NAME "lxpanel"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "lxpanel 0.7.1"
+#define PACKAGE_STRING "lxpanel 0.7.2"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "lxpanel"
@@ -132,7 +132,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.7.1"
+#define PACKAGE_VERSION "0.7.2"
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #define RETSIGTYPE void
@@ -144,7 +144,7 @@
 /* #undef TM_IN_SYS_TIME */
 
 /* Version number of package */
-#define VERSION "0.7.1"
+#define VERSION "0.7.2"
 
 /* Define to empty if `const' does not conform to ANSI C. */
 /* #undef const */
