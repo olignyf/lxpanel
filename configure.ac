@@ -210,6 +210,7 @@ plugin_cpufreq=
 plugin_monitors=
 plugin_indicator=
 plugin_dhcpcdui=
+plugin_ejecter=
 
 AC_MSG_CHECKING([which plugins should be built dynamically])
 AC_ARG_WITH(plugins,
@@ -219,7 +220,7 @@ AC_ARG_WITH(plugins,
 [                         plugins prefixed with '-' are not built]
 [                         Possible plugins are: ]
 [                         netstatus, netstat, volume, volumealsa, cpu, deskno, batt,]
-[                         kbled, xkb, thermal, cpufreq, monitors, indicator, weather, dhcpcdui]
+[                         kbled, xkb, thermal, cpufreq, monitors, indicator, weather, dhcpcdui, ejecter]
 , plugins="$withval",[plugins="all"])
 
 if test x"$plugins" != xall -a x"$plugins" != xnone; then
@@ -229,7 +230,7 @@ if test x"$plugins" != xall -a x"$plugins" != xnone; then
     fi
 fi
 
-ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui"
+ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui ejecter"
 AC_SUBST(ALL_PLUGINS_LIST)
 
 AC_DEFUN([check_plugin_name],[
@@ -300,6 +301,7 @@ PLUGINS_LIST="\
     $plugin_monitors \
     $plugin_indicator \
     $plugin_dhcpcdui \
+    $plugin_ejecter \
     $plugin_weather"
 
 AC_SUBST(PLUGINS_LIST)
@@ -462,6 +464,9 @@ echo Building dynamic plugins:
     fi
     if test x"$plugin_dhcpcdui" != x; then
         AC_MSG_RESULT([    dhcpcdui - WiFi network interface])
+    fi
+    if test x"$plugin_ejecter" != x; then
+        AC_MSG_RESULT([    ejecter - Ejects mounted drives])
     fi
 else
 echo Dynamic loader for plugins....... : disabled.

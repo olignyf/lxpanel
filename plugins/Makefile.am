@@ -64,7 +64,8 @@ EXTRA_LTLIBRARIES = \
 	volumealsa.la \
 	weather.la \
 	xkb.la \
-	dhcpcdui.la
+	dhcpcdui.la \
+	ejecter.la
 
 pkglibdir = $(libdir)/lxpanel/plugins
 
@@ -191,6 +192,12 @@ dhcpcdui_la_SOURCES = \
 	libdhcpcd/wpa.c
 dhcpcdui_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/dhcpcd-gtk  -I$(srcdir)/libdhcpcd
 dhcpcdui_la_LDFLAGS = -module @LXPANEL_MODULE@
+
+# ejecter
+ejecter_la_SOURCES = \
+	ejecter/ejecter.c
+ejecter_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/ejecter -I/usr/local/include/gnome-disk-utility
+ejecter_la_LDFLAGS = -module @LXPANEL_MODULE@ -lgdu
 
 flagsdir=$(datadir)/lxpanel/images/xkb-flags
 flags_DATA= \

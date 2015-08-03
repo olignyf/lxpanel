@@ -1527,7 +1527,7 @@ Optional Packages:
                          plugins prefixed with '-' are not built
                          Possible plugins are:
                          netstatus, netstat, volume, volumealsa, cpu, deskno, batt,
-                         kbled, xkb, thermal, cpufreq, monitors, indicator, weather, dhcpcdui
+                         kbled, xkb, thermal, cpufreq, monitors, indicator, weather, dhcpcdui, ejecter
 
   --with-x                use the X Window System
 
@@ -2548,8 +2548,8 @@ test "$program_suffix" != NONE &&
 ac_script='s/[\\$]/&&/g;s/;s,x,x,$//'
 program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 
-# expand $ac_aux_dir to an absolute path
-am_aux_dir=`cd $ac_aux_dir && pwd`
+# Expand $ac_aux_dir to an absolute path.
+am_aux_dir=`cd "$ac_aux_dir" && pwd`
 
 if test x"${MISSING+set}" != xset; then
   case $am_aux_dir in
@@ -2954,6 +2954,7 @@ END
     as_fn_error $? "Your 'rm' program is bad, sorry." "$LINENO" 5
   fi
 fi
+
 ac_config_headers="$ac_config_headers config.h"
 
 
@@ -5714,7 +5715,8 @@ else
     ;;
   *)
     lt_cv_sys_max_cmd_len=`(getconf ARG_MAX) 2> /dev/null`
-    if test -n "$lt_cv_sys_max_cmd_len"; then
+    if test -n "$lt_cv_sys_max_cmd_len" && \
+	test undefined != "$lt_cv_sys_max_cmd_len"; then
       lt_cv_sys_max_cmd_len=`expr $lt_cv_sys_max_cmd_len \/ 4`
       lt_cv_sys_max_cmd_len=`expr $lt_cv_sys_max_cmd_len \* 3`
     else
@@ -7234,7 +7236,7 @@ ia64-*-hpux*)
   rm -rf conftest*
   ;;
 
-x86_64-*kfreebsd*-gnu|x86_64-*linux*|ppc*-*linux*|powerpc*-*linux*| \
+x86_64-*kfreebsd*-gnu|x86_64-*linux*|powerpc*-*linux*| \
 s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
   # Find out which ABI we are using.
   echo 'int i;' > conftest.$ac_ext
@@ -7250,9 +7252,19 @@ s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
 	    LD="${LD-ld} -m elf_i386_fbsd"
 	    ;;
 	  x86_64-*linux*)
-	    LD="${LD-ld} -m elf_i386"
+	    case `/usr/bin/file conftest.o` in
+	      *x86-64*)
+		LD="${LD-ld} -m elf32_x86_64"
+		;;
+	      *)
+		LD="${LD-ld} -m elf_i386"
+		;;
+	    esac
 	    ;;
-	  ppc64-*linux*|powerpc64-*linux*)
+	  powerpc64le-*)
+	    LD="${LD-ld} -m elf32lppclinux"
+	    ;;
+	  powerpc64-*)
 	    LD="${LD-ld} -m elf32ppclinux"
 	    ;;
 	  s390x-*linux*)
@@ -7271,7 +7283,10 @@ s390*-*linux*|s390*-*tpf*|sparc*-*linux*)
 	  x86_64-*linux*)
 	    LD="${LD-ld} -m elf_x86_64"
 	    ;;
-	  ppc*-*linux*|powerpc*-*linux*)
+	  powerpcle-*)
+	    LD="${LD-ld} -m elf64lppc"
+	    ;;
+	  powerpc-*)
 	    LD="${LD-ld} -m elf64ppc"
 	    ;;
 	  s390*-*linux*|s390*-*tpf*)
@@ -13138,6 +13153,7 @@ plugin_cpufreq=
 plugin_monitors=
 plugin_indicator=
 plugin_dhcpcdui=
+plugin_ejecter=
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking which plugins should be built dynamically" >&5
 $as_echo_n "checking which plugins should be built dynamically... " >&6; }
@@ -13156,7 +13172,7 @@ if test x"$plugins" != xall -a x"$plugins" != xnone; then
     fi
 fi
 
-ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui"
+ALL_PLUGINS_LIST="netstatus netstat volume volumealsa cpu deskno batt kbled xkb thermal cpufreq monitors indicator weather dhcpcdui ejecter"
 
 
 
@@ -13237,6 +13253,7 @@ PLUGINS_LIST="\
     $plugin_monitors \
     $plugin_indicator \
     $plugin_dhcpcdui \
+    $plugin_ejecter \
     $plugin_weather"
 
 
@@ -17488,6 +17505,10 @@ $as_echo "    weather - Weather conditions and forecast" >&6; }
     if test x"$plugin_dhcpcdui" != x; then
         { $as_echo "$as_me:${as_lineno-$LINENO}: result:     dhcpcdui - WiFi network interface" >&5
 $as_echo "    dhcpcdui - WiFi network interface" >&6; }
+    fi
+    if test x"$plugin_ejecter" != x; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result:     ejecter - Ejects mounted drives" >&5
+$as_echo "    ejecter - Ejects mounted drives" >&6; }
     fi
 else
 echo Dynamic loader for plugins....... : disabled.

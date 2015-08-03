@@ -57,7 +57,7 @@
 #define HAVE_MEMSET 1
 
 /* Define to 1 if you have the `menu_cache_dir_list_children' function. */
-/* #undef HAVE_MENU_CACHE_DIR_LIST_CHILDREN */
+#define HAVE_MENU_CACHE_DIR_LIST_CHILDREN 1
 
 /* Define to 1 if you have the `mkdir' function. */
 #define HAVE_MKDIR 1
