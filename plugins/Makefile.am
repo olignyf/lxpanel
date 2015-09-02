@@ -197,7 +197,7 @@ dhcpcdui_la_LDFLAGS = -module @LXPANEL_MODULE@
 ejecter_la_SOURCES = \
 	ejecter/ejecter.c
 ejecter_la_CFLAGS = -DPACKAGE_DATA_DIR=\""$(datadir)/lxpanel"\" -I$(srcdir)/ejecter -I/usr/local/include/gnome-disk-utility
-ejecter_la_LDFLAGS = -module @LXPANEL_MODULE@ -lgdu
+ejecter_la_LDFLAGS = -module @LXPANEL_MODULE@
 
 flagsdir=$(datadir)/lxpanel/images/xkb-flags
 flags_DATA= \
