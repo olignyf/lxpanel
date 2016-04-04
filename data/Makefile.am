@@ -85,7 +85,9 @@ lxpanel_images_DATA = \
 	images/network-wireless-encrypted.png \
 	images/network-wireless.png \
 	images/preferences-system-bluetooth.png \
-	images/preferences-system-bluetooth-inactive.png
+	images/preferences-system-bluetooth-inactive.png \
+	images/bluetooth-online.png \
+	images/bluetooth-offline.png
 
 lxpanel_imagesdir = $(datadir)/lxpanel/images
 
