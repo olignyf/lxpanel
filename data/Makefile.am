@@ -86,6 +86,7 @@ lxpanel_images_DATA = \
 	images/network-wireless.png \
 	images/preferences-system-bluetooth.png \
 	images/preferences-system-bluetooth-inactive.png \
+	images/preferences-system-bluetooth-active.png \
 	images/bluetooth-online.png \
 	images/bluetooth-offline.png
 
