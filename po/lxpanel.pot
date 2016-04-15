@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-04-15 15:22+0100\n"
+"POT-Creation-Date: 2016-04-15 18:18+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -954,8 +954,8 @@ msgstr ""
 
 #. FIXME: display current level in tooltip. ex: "Volume Control: 80%"
 #. Display current level in tooltip.
-#: ../plugins/volume/volume.c:278 ../plugins/volumealsa/volumealsa.c:1305
-#: ../plugins/volumealsa/volumealsa.c:2028
+#: ../plugins/volume/volume.c:278 ../plugins/volumealsa/volumealsa.c:1328
+#: ../plugins/volumealsa/volumealsa.c:2055
 msgid "Volume control"
 msgstr ""
 
@@ -964,82 +964,82 @@ msgid "Volume Control"
 msgstr ""
 
 #. Create a frame as the child of the vbox.
-#: ../plugins/volume/volume-impl.c:109 ../plugins/volumealsa/volumealsa.c:1892
+#: ../plugins/volume/volume-impl.c:109 ../plugins/volumealsa/volumealsa.c:1919
 msgid "Volume"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:509
+#: ../plugins/volumealsa/volumealsa.c:516
 msgid "Could not get BlueZ interface"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:686
+#: ../plugins/volumealsa/volumealsa.c:693
 msgid "Could not connect to PulseAudio"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:696
+#: ../plugins/volumealsa/volumealsa.c:703
 msgid "Connecting Audio Device"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:700
+#: ../plugins/volumealsa/volumealsa.c:707
 #, c-format
 msgid "Connecting to Bluetooth audio device '%s'..."
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:711
+#: ../plugins/volumealsa/volumealsa.c:718
 #, c-format
 msgid "Failed to connect to device - %s. Try to connect again."
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:713
-#: ../plugins/bluetooth/bluetooth.c:1024 ../plugins/bluetooth/bluetooth.c:1118
-#: ../plugins/bluetooth/bluetooth.c:1342
+#: ../plugins/volumealsa/volumealsa.c:720
+#: ../plugins/bluetooth/bluetooth.c:1057 ../plugins/bluetooth/bluetooth.c:1151
+#: ../plugins/bluetooth/bluetooth.c:1380
 msgid "_OK"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:1339
+#: ../plugins/volumealsa/volumealsa.c:1362
 #, c-format
 msgid "Unknown Volume Control %d"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:1563
-#: ../plugins/volumealsa/volumealsa.c:1938
+#: ../plugins/volumealsa/volumealsa.c:1586
+#: ../plugins/volumealsa/volumealsa.c:1965
 msgid "Analog"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:1573
-#: ../plugins/volumealsa/volumealsa.c:1944
+#: ../plugins/volumealsa/volumealsa.c:1596
+#: ../plugins/volumealsa/volumealsa.c:1971
 msgid "HDMI"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:1670
+#: ../plugins/volumealsa/volumealsa.c:1697
 msgid "USB Device Settings..."
 msgstr ""
 
 #. Create a check button as the child of the vertical box.
-#: ../plugins/volumealsa/volumealsa.c:1915
+#: ../plugins/volumealsa/volumealsa.c:1942
 msgid "Mute"
 msgstr ""
 
 #. Create a frame as the child of the vbox.
-#: ../plugins/volumealsa/volumealsa.c:1922
+#: ../plugins/volumealsa/volumealsa.c:1949
 msgid "Output"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:1931
+#: ../plugins/volumealsa/volumealsa.c:1958
 msgid "Auto"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:2143
+#: ../plugins/volumealsa/volumealsa.c:2170
 msgid ""
 "Error, you need to install an application to configure the sound "
 "(pavucontrol, alsamixer ...)"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:2178
+#: ../plugins/volumealsa/volumealsa.c:2205
 msgid "Volume Control (ALSA)"
 msgstr ""
 
-#: ../plugins/volumealsa/volumealsa.c:2179
+#: ../plugins/volumealsa/volumealsa.c:2206
 msgid "Display and control volume for ALSA"
 msgstr ""
 
@@ -2134,196 +2134,210 @@ msgid "Ejects mounted drives"
 msgstr ""
 
 #. create the dialog, asking user to accept the pairing
-#: ../plugins/bluetooth/bluetooth.c:887
+#: ../plugins/bluetooth/bluetooth.c:920
 #, c-format
 msgid "Do you accept pairing from device '%s'?"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:888
+#: ../plugins/bluetooth/bluetooth.c:921
 msgid "Pairing Request"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1010
+#: ../plugins/bluetooth/bluetooth.c:1043
 #, c-format
 msgid "Pairing Device '%s'"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1016
+#: ../plugins/bluetooth/bluetooth.c:1049
 msgid "Pairing request sent to device - waiting for response..."
 msgstr ""
 
 #. add the buttons
-#: ../plugins/bluetooth/bluetooth.c:1023 ../plugins/bluetooth/bluetooth.c:1117
-#: ../plugins/bluetooth/bluetooth.c:1264
+#: ../plugins/bluetooth/bluetooth.c:1056 ../plugins/bluetooth/bluetooth.c:1150
+#: ../plugins/bluetooth/bluetooth.c:1302
 msgid "_Cancel"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1037
+#: ../plugins/bluetooth/bluetooth.c:1070
 #, c-format
 msgid "Pairing failed - %s"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1046
+#: ../plugins/bluetooth/bluetooth.c:1079
 msgid "Pairing successful - creating connection..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1053
+#: ../plugins/bluetooth/bluetooth.c:1086
 msgid "Connected successfully"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1060
+#: ../plugins/bluetooth/bluetooth.c:1093
 #, c-format
 msgid "Connection failed - %s. Try to connect manually."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1068
+#: ../plugins/bluetooth/bluetooth.c:1101
 #, c-format
 msgid "Please enter code '%s' on device '%s'"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1076
+#: ../plugins/bluetooth/bluetooth.c:1109
 #, c-format
 msgid "Please confirm that device '%s' is showing the code '%s' to connect"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1086
+#: ../plugins/bluetooth/bluetooth.c:1119
 #, c-format
 msgid "Please enter PIN code for device '%s'"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1099
+#: ../plugins/bluetooth/bluetooth.c:1132
 msgid "Waiting for response from device..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1107
+#: ../plugins/bluetooth/bluetooth.c:1140
 msgid "Pairing Requested"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1111
+#: ../plugins/bluetooth/bluetooth.c:1144
 #, c-format
 msgid "Device '%s' has requested a pairing. Do you accept the request?"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1127
+#: ../plugins/bluetooth/bluetooth.c:1160
 #, c-format
 msgid "Rejecting pairing..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1134
+#: ../plugins/bluetooth/bluetooth.c:1167
 #, c-format
 msgid "Removal of pairing failed - %s. Remove the device manually."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1142
+#: ../plugins/bluetooth/bluetooth.c:1175
 msgid "Paired successfully. Use the audio menu to select as output device."
 msgstr ""
 
+#: ../plugins/bluetooth/bluetooth.c:1182
+msgid ""
+"Paired successfully, but this device has no services which can be used with "
+"Raspberry Pi."
+msgstr ""
+
 #. create the window
-#: ../plugins/bluetooth/bluetooth.c:1256
+#: ../plugins/bluetooth/bluetooth.c:1294
 msgid "Add New Device"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1256 ../plugins/bluetooth/bluetooth.c:1309
+#: ../plugins/bluetooth/bluetooth.c:1294 ../plugins/bluetooth/bluetooth.c:1347
 #, c-format
 msgid "Remove Device"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1265
+#: ../plugins/bluetooth/bluetooth.c:1303
 msgid "_Pair"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1265
+#: ../plugins/bluetooth/bluetooth.c:1303
 msgid "_Remove"
 msgstr ""
 
 #. add a label
-#: ../plugins/bluetooth/bluetooth.c:1271
+#: ../plugins/bluetooth/bluetooth.c:1309
 msgid "Searching for Bluetooth devices..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1271
+#: ../plugins/bluetooth/bluetooth.c:1309
 msgid "Paired Bluetooth devices"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1310
+#: ../plugins/bluetooth/bluetooth.c:1348
 #, c-format
 msgid "Removing paired device '%s'..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1310
+#: ../plugins/bluetooth/bluetooth.c:1348
 #, c-format
 msgid "Removal failed - %s"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1314
+#: ../plugins/bluetooth/bluetooth.c:1352
 #, c-format
 msgid "Connect Device"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1315
+#: ../plugins/bluetooth/bluetooth.c:1353
 #, c-format
 msgid "Connecting to device '%s'..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1315
+#: ../plugins/bluetooth/bluetooth.c:1353
 #, c-format
 msgid "Connection failed - %s"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1319
+#: ../plugins/bluetooth/bluetooth.c:1357
 #, c-format
 msgid "Disconnect Device"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1320
+#: ../plugins/bluetooth/bluetooth.c:1358
 #, c-format
 msgid "Disconnecting from device '%s'..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1320
+#: ../plugins/bluetooth/bluetooth.c:1358
 #, c-format
 msgid "Disconnection failed - %s"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1469
+#: ../plugins/bluetooth/bluetooth.c:1440
+msgid "Use the audio menu to connect to this device"
+msgstr ""
+
+#: ../plugins/bluetooth/bluetooth.c:1442
+msgid "No usable services on this device"
+msgstr ""
+
+#: ../plugins/bluetooth/bluetooth.c:1509
 msgid "Disconnect..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1475
+#: ../plugins/bluetooth/bluetooth.c:1515
 msgid "Connect..."
 msgstr ""
 
 #. warn if no BT hardware detected
-#: ../plugins/bluetooth/bluetooth.c:1668
+#: ../plugins/bluetooth/bluetooth.c:1708
 msgid "No Bluetooth adapter found"
 msgstr ""
 
 #. discoverable toggle
-#: ../plugins/bluetooth/bluetooth.c:1675
+#: ../plugins/bluetooth/bluetooth.c:1715
 msgid "Stop Discoverable"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1676
+#: ../plugins/bluetooth/bluetooth.c:1716
 msgid "Make Discoverable"
 msgstr ""
 
 #. add and remove dialogs
-#: ../plugins/bluetooth/bluetooth.c:1683
+#: ../plugins/bluetooth/bluetooth.c:1723
 msgid "Add Device..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1686
+#: ../plugins/bluetooth/bluetooth.c:1726
 msgid "Remove Device..."
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1765
+#: ../plugins/bluetooth/bluetooth.c:1805
 msgid "Manage Bluetooth devices"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1800
+#: ../plugins/bluetooth/bluetooth.c:1840
 msgid "Bluetooth"
 msgstr ""
 
-#: ../plugins/bluetooth/bluetooth.c:1801
+#: ../plugins/bluetooth/bluetooth.c:1841
 msgid "Manages Bluetooth devices"
 msgstr ""

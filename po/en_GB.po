@@ -2246,6 +2246,14 @@ msgstr "Removal of pairing failed - %s. Remove the device manually."
 msgid "Paired successfully. Use the audio menu to select as output device."
 msgstr "Paired successfully. Use the audio menu to select as output device."
 
+#: ../plugins/bluetooth/bluetooth.c:1182
+msgid ""
+"Paired successfully, but this device has no services which can be used with "
+"Raspberry Pi."
+msgstr ""
+"Paired successfully, but this device has no services which can be used with "
+"Raspberry Pi."
+
 #. create the window
 #: ../plugins/bluetooth/bluetooth.c:1254
 msgid "Add New Device"
@@ -2310,6 +2318,14 @@ msgstr "Disconnecting from device '%s'..."
 #, c-format
 msgid "Disconnection failed - %s"
 msgstr "Disconnection failed - %s"
+
+#: ../plugins/bluetooth/bluetooth.c:1440
+msgid "Use the audio menu to connect to this device"
+msgstr "Use the audio menu to connect to this device"
+
+#: ../plugins/bluetooth/bluetooth.c:1442
+msgid "No usable services on this device"
+msgstr "No usable services on this device"
 
 #: ../plugins/bluetooth/bluetooth.c:1464
 msgid "Disconnect..."
