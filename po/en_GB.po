@@ -979,19 +979,33 @@ msgstr "Volume Control"
 msgid "Volume"
 msgstr "Volume"
 
-#. show a warning dialog
-#: ../plugins/volumealsa/volumealsa.c:523
-msgid "Connection Failure"
-msgstr "Connection Failure"
+#: ../plugins/volumealsa/volumealsa.c:509
+msgid "Could not get BlueZ interface"
+msgstr "Could not get BlueZ interface"
 
-#: ../plugins/volumealsa/volumealsa.c:527
+#: ../plugins/volumealsa/volumealsa.c:686
+msgid "Could not connect to PulseAudio"
+msgstr "Could not connect to PulseAudio"
+
+#: ../plugins/volumealsa/volumealsa.c:696
+msgid "Connecting Audio Device"
+msgstr "Connecting Audio Device"
+
+#: ../plugins/volumealsa/volumealsa.c:700
+#, c-format
+msgid "Connecting to Bluetooth audio device '%s'..."
+msgstr "Connecting to Bluetooth audio device '%s'..."
+
+#: ../plugins/volumealsa/volumealsa.c:711
 #, c-format
 msgid "Failed to connect to device - %s. Try to connect again."
 msgstr "Failed to connect to device - %s. Try to connect again."
 
-#: ../plugins/volumealsa/volumealsa.c:533
-msgid "OK"
-msgstr "OK"
+#: ../plugins/volumealsa/volumealsa.c:713
+#: ../plugins/bluetooth/bluetooth.c:1024 ../plugins/bluetooth/bluetooth.c:1118
+#: ../plugins/bluetooth/bluetooth.c:1342
+msgid "_OK"
+msgstr "_OK"
 
 #: ../plugins/volumealsa/volumealsa.c:1259
 msgid "Unknown Volume Control %d"
@@ -2171,11 +2185,6 @@ msgstr "Pairing request sent to device - waiting for response..."
 #: ../plugins/bluetooth/bluetooth.c:1262
 msgid "_Cancel"
 msgstr "_Cancel"
-
-#: ../plugins/bluetooth/bluetooth.c:1024 ../plugins/bluetooth/bluetooth.c:1118
-#: ../plugins/bluetooth/bluetooth.c:1339
-msgid "_OK"
-msgstr "_OK"
 
 #: ../plugins/bluetooth/bluetooth.c:1037
 #, c-format
