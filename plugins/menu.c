@@ -745,12 +745,12 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     m->menu = menu;
     m->btn = gtk_button_new();
     gtk_container_set_border_width(GTK_CONTAINER(m->btn), 0);
-    gtk_misc_set_alignment (GTK_MISC (m->btn), 0.5, 0.5);
+    //gtk_misc_set_alignment (GTK_MISC (m->btn), 0.5, 0.5);
 
     /* Create a box to contain the application icon and window title. */
     GtkWidget * container = gtk_hbox_new(FALSE, 1);
     gtk_container_set_border_width(GTK_CONTAINER(container), 0);
-    gtk_misc_set_alignment (GTK_MISC (container), 0.5, 0.5);
+    //gtk_misc_set_alignment (GTK_MISC (container), 0.5, 0.5);
 
     /* Create an image to contain the application icon and add it to the box. */
     if (fname)

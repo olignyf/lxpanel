@@ -2869,7 +2869,7 @@ static void task_build_gui(LaunchTaskBarPlugin * tb, Task * tk)
     /* Add the box to the button. */
     gtk_container_add(GTK_CONTAINER(tk->button), container);
     gtk_container_set_border_width(GTK_CONTAINER(tk->button), 0);
-    gtk_misc_set_alignment (GTK_MISC (tk->button), 0.5, 0.5);
+    //gtk_misc_set_alignment (GTK_MISC (tk->button), 0.5, 0.5);
 
     /* Add the button to the taskbar. */
     gtk_container_add(GTK_CONTAINER(tb->tb_icon_grid), tk->button);
