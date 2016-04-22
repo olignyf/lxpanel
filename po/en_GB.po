@@ -1025,6 +1025,10 @@ msgstr "HDMI"
 msgid "USB Device Settings..."
 msgstr "USB Device Settings..."
 
+#: ../plugins/volumealsa/volumealsa.c:1753
+msgid "No audio devices found"
+msgstr "No audio devices found"
+
 #. Create a check button as the child of the vertical box.
 #: ../plugins/volumealsa/volumealsa.c:1835
 msgid "Mute"
