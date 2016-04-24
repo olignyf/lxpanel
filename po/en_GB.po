@@ -1023,7 +1023,7 @@ msgstr "HDMI"
 
 #: ../plugins/volumealsa/volumealsa.c:1590
 msgid "USB Device Settings..."
-msgstr "USB Device Settings..."
+msgstr "External Device Settings..."
 
 #: ../plugins/volumealsa/volumealsa.c:1753
 msgid "No audio devices found"
