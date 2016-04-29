@@ -56,7 +56,11 @@ static int get_cmd( const char* cmd )
         return LXPANEL_CMD_REFRESH;
     else if( ! strcmp( cmd, "alsaconf") )
         return LXPANEL_CMD_ALSACONF;
-    return -1;
+    else if( ! strcmp( cmd, "alsastart") )
+        return LXPANEL_CMD_ALSASTART;
+    else if( ! strcmp( cmd, "alsastop") )
+        return LXPANEL_CMD_ALSASTOP;
+   return -1;
 }
 
 int main( int argc, char** argv )
