@@ -32,13 +32,15 @@ static const char usage[] =
         "\nlxpanelctl - LXPanel Controller\n"
         "Usage: lxpanelctl <command>\n\n"
         "Available commands:\n"
-        "menu\tshow system menu\n"
-        "run\tshow run dialog\n"
-        "config\tshow configuration dialog\n"
-        "restart\trestart lxpanel\n"
-        "refresh\trefresh lxpanel\n"
+        "menu\t\tshow system menu\n"
+        "run\t\tshow run dialog\n"
+        "config\t\tshow configuration dialog\n"
+        "restart\t\trestart lxpanel\n"
+        "refresh\t\trefresh lxpanel\n"
         "alsaconf\tupdate ALSA volume plugin\n"
-        "exit\texit lxpanel\n\n";
+        "alsastop\ttemporarily release ALSA device\n"
+        "alsastart\treacquire ALSA device\n"
+        "exit\t\texit lxpanel\n\n";
 
 static int get_cmd( const char* cmd )
 {
