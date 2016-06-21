@@ -734,6 +734,12 @@ pass_signal(GtkWidget *widget, GdkEventButton *event, menup *m)
     return TRUE;
 }
 
+#ifdef NEW_BUTTON
+#define EXTRA_SIZE 15
+#else
+#define EXTRA_SIZE 0
+#endif
+
 static GtkWidget *
 make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, GtkWidget *menu)
 {
@@ -744,6 +750,9 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
     ENTER;
     m->menu = menu;
     m->btn = gtk_button_new();
+#ifdef NEW_BUTTON
+    gtk_button_set_relief (GTK_BUTTON (m->btn), GTK_RELIEF_NONE);
+#endif
     gtk_container_set_border_width(GTK_CONTAINER(m->btn), 0);
     //gtk_misc_set_alignment (GTK_MISC (m->btn), 0.5, 0.5);
 
@@ -762,7 +771,7 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
             pixbuf = gdk_pixbuf_new_from_file_at_scale(m->fname, -1, panel_get_icon_size(m->panel) - ICON_BUTTON_TRIM, TRUE, NULL);
         }
         m->icon = gtk_image_new_from_pixbuf(pixbuf);
-        gtk_misc_set_padding(GTK_MISC(m->icon), 0, 0);
+        gtk_misc_set_padding(GTK_MISC(m->icon), EXTRA_SIZE, 0);
         gtk_misc_set_alignment (GTK_MISC (m->icon), 0.5, 0.5);
         spacing = panel_get_icon_size (m->panel);
         g_object_unref(pixbuf);
@@ -806,7 +815,7 @@ make_button(menup *m, const gchar *fname, const gchar *name, GdkColor* tint, Gtk
 
     gtk_widget_show_all(m->btn);
 
-    panel_icon_grid_set_geometry(PANEL_ICON_GRID(m->grid), panel_get_orientation(m->panel), spacing,
+    panel_icon_grid_set_geometry(PANEL_ICON_GRID(m->grid), panel_get_orientation(m->panel), spacing + EXTRA_SIZE * 2,
         panel_get_icon_size(m->panel), 0, 0, panel_get_height(m->panel));
 
     gtk_container_add(GTK_CONTAINER(m->grid), m->btn);
