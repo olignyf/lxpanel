@@ -49,10 +49,10 @@ lxpanel_images_DATA = \
 	images/gnome-netstatus-tx.png \
 	images/background.png \
 	images/volume.png \
-	images/volume-low.png \
-	images/volume-medium.png \
-	images/volume-high.png \
-	images/mute.png \
+	images/audio-volume-low.png \
+	images/audio-volume-medium.png \
+	images/audio-volume-high.png \
+	images/audio-volume-muted.png \
 	images/ns-bothrs.png \
 	images/ns-connected.png \
 	images/ns-disconnect.png \
